@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural Networks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="main.js" type="module"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<svg class="svg-filters" aria-hidden="true">
+  <filter id="glitch" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="1" result="t"/>
+    <feDisplacementMap id="glitch-map" in="SourceGraphic" in2="t" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="boot-overlay"></div>
+<div class="noise-overlay"></div>
+<div class="intro-net" id="introNet"></div>
+
+<div class="hero-stage">
+  <h1 class="hero-title" id="heroTitle">
+    <svg class="title-net" viewBox="0 0 1600 900" aria-hidden="true">
+      <g class="title-net-edges" fill="none"></g>
+      <g class="title-net-nodes"></g>
+    </svg>
+    <span class="title-hover-rule" aria-hidden="true"></span>
+    <span class="hero-title__line" data-text="Neural"></span>
+    <span class="hero-title__line" data-text="Networks"></span>
+  </h1>
+</div>
+
+<article class="info">
+  <p class="info__lede">
+    An artificial neural network is a computational model inspired by biological neural networks. It consists of connected units called <em>artificial neurons</em>.
+  </p>
+  <div class="info__body">
+    <p class="info__pullquote">
+      Each connection has a weight; each neuron transforms its inputs.
+    </p>
+    <div class="info__details">
+      <p>Signals travel from an input layer, through any hidden layers, to an output layer. Each neuron processes incoming signals and applies a nonlinear activation function before passing its output onward.</p>
+      <p>During training, the network adjusts connection weights using examples. Those weights shape its outputs and let it make predictions on new inputs.</p>
+    </div>
+  </div>
+</article>
+<a class="wikipedia-link" href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank" rel="noopener noreferrer" aria-label="Read the Artificial neural network article on Wikipedia">
+  <span class="wikipedia-label" aria-hidden="true">Wikipedia</span>
+  <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-labelledby="wikipedia-title">
+    <title id="wikipedia-title">Wikipedia</title>
+    <path d="M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.045c.924-.005 5.401 0 5.401 0l.051.045v.434c0 .119-.075.176-.225.176l-.564.031c-.485.029-.727.164-.727.436 0 .135.053.33.166.601 1.082 2.646 4.818 10.521 4.818 10.521l.136.046 2.411-4.81-.482-1.067-1.658-3.264s-.318-.654-.428-.872c-.728-1.443-.712-1.518-1.447-1.617-.207-.023-.313-.05-.313-.149v-.468l.06-.045h4.292l.113.037v.451c0 .105-.076.15-.227.15l-.308.047c-.792.061-.661.381-.136 1.422l1.582 3.252 1.758-3.504c.293-.64.233-.801.111-.947-.07-.084-.305-.22-.812-.24l-.201-.021c-.052 0-.098-.015-.145-.051-.045-.031-.067-.076-.067-.129v-.427l.061-.045c1.247-.008 4.043 0 4.043 0l.059.045v.436c0 .121-.059.178-.193.178-.646.03-.782.095-1.023.439-.12.186-.375.589-.646 1.039l-2.301 4.273-.065.135 2.792 5.712.17.048 4.396-10.438c.154-.422.129-.722-.064-.895-.197-.172-.346-.273-.857-.295l-.42-.016c-.061 0-.105-.014-.152-.045-.043-.029-.072-.075-.072-.119v-.436l.059-.045h4.961l.041.045v.437c0 .119-.074.18-.209.18-.648.03-1.127.18-1.443.421-.314.255-.557.616-.736 1.067 0 0-4.043 9.258-5.426 12.339-.525 1.007-1.053.917-1.503-.031-.571-1.171-1.773-3.786-2.646-5.71l.053-.036z"/>
+  </svg>
+</a>
+<nav class="spy" id="spy" aria-label="Sections">
+  <ul class="spy__list">
+    <li class="spy__item"><a class="spy__link" href="#overview"><span class="spy__bar"></span><span class="spy__label">Overview</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#neurons"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#weights"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#training"><span class="spy__bar"></span><span class="spy__label">Future</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#source"><span class="spy__bar"></span><span class="spy__label">Conclusion</span></a></li>
+  </ul>
+</nav>
+<div class="scroll-space" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+
+
+
+</script>
+
+</body>
+</html>

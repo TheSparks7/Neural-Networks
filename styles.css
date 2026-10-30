@@ -1,0 +1,360 @@
+:root{
+  --bg:#08090a;
+  --fg:#ebe8e1;
+  --dim:#66635d;
+  --line:rgba(235,232,225,.10);
+  --accent:#ff5c2e;
+  --display:"Fraunces","Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{background:var(--bg);overflow-x:hidden}
+
+html.is-locked{overflow:hidden}
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--mono);
+  overflow-x:hidden;
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+
+.scroll-space{
+  height:320vh;
+  width:100%;
+  pointer-events:none;
+}
+
+.svg-filters{position:absolute;width:0;height:0;pointer-events:none}
+
+.boot-overlay{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:1000;
+  pointer-events:none;
+}
+
+.noise-overlay{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  pointer-events:none;
+  opacity:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  mix-blend-mode:screen;
+  animation:noiseShift .15s steps(4) infinite;
+}
+
+@keyframes noiseShift{
+  0%{background-position:0 0}
+  25%{background-position:-50px 30px}
+  50%{background-position:20px -40px}
+  75%{background-position:-30px -20px}
+  100%{background-position:40px 50px}
+}
+
+.intro-net{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  pointer-events:none;
+}
+.intro-net svg{width:100%;height:100%;display:block}
+.intro-net-node{fill:var(--bg);stroke:var(--dim);stroke-width:1}
+.intro-net-edge{stroke:rgba(235,232,225,.09);stroke-width:.9}
+
+.hero-stage{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:200;
+  padding:0 24px;
+}
+
+.hero-title{
+  position:relative;
+  isolation:isolate;
+  font-family:var(--display);
+  font-size:clamp(3rem,14vw,15rem);
+  line-height:.82;
+  letter-spacing:-.055em;
+  font-weight:300;
+  font-variation-settings:"opsz" 144,"wght" 300,"SOFT" 30,"WONK" 1;
+  will-change:transform,filter;
+  text-align:center;
+  pointer-events:auto;
+}
+
+.title-net{
+  position:absolute;
+  z-index:0;
+  top:50%;
+  left:50%;
+  width:128%;
+  height:190%;
+  overflow:visible;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+.title-net-edge{stroke:rgba(235,232,225,.2);stroke-width:1}
+.title-net-node{fill:var(--bg);stroke:var(--dim);stroke-width:1.2}
+.title-net-node--accent{stroke:var(--accent)}
+
+.hero-title__line{position:relative;z-index:1;display:block;white-space:nowrap}
+.hero-title .char{display:inline-block}
+.title-hover-rule{
+  position:absolute;
+  z-index:2;
+  left:15%;
+  bottom:-.12em;
+  width:70%;
+  height:2px;
+  background:var(--accent);
+  transform:scaleX(0);
+  transform-origin:center;
+  pointer-events:none;
+}
+
+.info{
+  position:fixed;
+  top:8vh;
+  left:42vw;
+  right:4vw;
+  bottom:4vh;
+  max-width:820px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:40px;
+}
+
+.info__lede{
+  font-family:var(--display);
+  font-size:clamp(1.4rem,1.95vw,2rem);
+  line-height:1.32;
+  letter-spacing:-.02em;
+  font-weight:300;
+  font-variation-settings:"opsz" 48,"wght" 300,"SOFT" 30,"WONK" 1;
+  text-wrap:balance;
+}
+
+.info__lede::first-letter{
+  float:left;
+  font-size:4em;
+  line-height:.8;
+  padding:8px 12px 0 0;
+  color:var(--accent);
+  font-weight:500;
+  font-variation-settings:"opsz" 144,"wght" 500,"SOFT" 100,"WONK" 1;
+}
+
+.info__lede em{
+  font-style:italic;
+  color:var(--accent);
+  font-variation-settings:"opsz" 144,"wght" 400,"SOFT" 100,"WONK" 1;
+}
+
+.info__body{
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:32px;
+  align-items:start;
+  padding-top:22px;
+  padding-bottom:14px;
+  border-top:1px solid var(--line);
+}
+
+.info__pullquote{
+  font-family:var(--display);
+  font-style:italic;
+  font-size:clamp(1.2rem,1.6vw,1.65rem);
+  line-height:1.22;
+  letter-spacing:-.015em;
+  color:var(--accent);
+  font-weight:300;
+  font-variation-settings:"opsz" 96,"wght" 300,"SOFT" 100,"WONK" 1;
+}
+
+.info__details{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.info__details p{
+  font-family:var(--mono);
+  font-size:clamp(11px,0.95vw,13px);
+  line-height:1.75;
+  color:var(--dim);
+  letter-spacing:.01em;
+}
+
+.wikipedia-link{
+  position:fixed;
+  right:4vw;
+  bottom:2vh;
+  display:block;
+  width:24px;
+  height:24px;
+  color:var(--dim);
+  transition:color .25s ease;
+}
+
+.wikipedia-link:hover,
+.wikipedia-link:focus-visible{color:var(--fg)}
+
+.wikipedia-link svg{display:block;width:100%;height:100%;fill:currentColor}
+
+.wikipedia-label{
+  position:absolute;
+  top:50%;
+  right:calc(100% + 10px);
+  color:var(--fg);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/*some other stuff I want to try out if I can make it work somehow*/
+.spy{
+  --trans:.4s cubic-bezier(.22,1,.36,1);
+  position:fixed;
+  left:2.2vw;
+  top:0;
+  bottom:0;
+  z-index:300;
+  display:flex;
+  align-items:center;
+  pointer-events:none;
+}
+
+.spy__list{
+  --w:40px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  list-style:none;
+  pointer-events:auto;
+}
+
+.spy__item{
+  position:relative;
+  flex:0 0 var(--w);
+  height:var(--w);
+  display:flex;
+  align-items:center;
+  transform-origin:left center;
+  transition:var(--trans);
+}
+
+.spy__link{
+  display:flex;
+  align-items:center;
+  height:100%;
+  color:inherit;
+  text-decoration:none;
+  outline:none;
+}
+
+.spy__bar{
+  display:block;
+  width:14px;
+  height:1px;
+  background:rgba(235,232,225,.28);
+  transition:width var(--trans),background var(--trans),box-shadow var(--trans);
+}
+
+.spy__label{
+  position:absolute;
+  left:calc(100% + 11px);
+  top:50%;
+  translate:0 -50%;
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--dim);
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s ease,color .3s ease;
+}
+
+.spy__item.is-active .spy__bar{
+  width:26px;
+  background:var(--accent);
+  box-shadow:0 0 12px rgba(255,92,46,.55);
+}
+.spy__item.is-active .spy__label{color:var(--accent)}
+.spy__item:hover .spy__bar{background:var(--fg)}
+.spy__item.is-active:hover .spy__bar{background:var(--accent)}
+
+.spy__item:hover .spy__label,
+.spy__item:focus-within .spy__label{opacity:1;color:var(--fg)}
+.spy__item.is-active:hover .spy__label,
+.spy__item.is-active:focus-within .spy__label{color:var(--accent)}
+.spy__item:focus-within .spy__bar{background:var(--accent)}
+
+.spy__item:hover{
+  scale:2.2;
+  margin-block:1.1rem;
+}
+.spy__item:hover + .spy__item,
+.spy__item:has(+ .spy__item:hover){
+  scale:1.85;
+  margin-block:.6rem;
+}
+.spy__item:hover + .spy__item + .spy__item,
+.spy__item:has(+ .spy__item + .spy__item:hover){
+  scale:1.5;
+  margin-block:.35rem;
+}
+.spy__item:hover + .spy__item + .spy__item + .spy__item,
+.spy__item:has(+ .spy__item + .spy__item + .spy__item:hover){
+  scale:1.2;
+  margin-block:.15rem;
+}
+/* experiment end*/
+
+@media (max-width:768px){
+  body{overflow-x:hidden;overflow-y:auto;overscroll-behavior:auto}
+  .scroll-space{display:none}
+  .hero-stage{position:relative;min-height:100vh;min-height:100svh}
+  .info{
+    position:relative;
+    inset:auto;
+    width:auto;
+    max-width:none;
+    margin:0 6vw;
+    padding:6vh 0 8vh;
+    gap:28px;
+  }
+  .info__lede{font-size:1.15rem}
+  .info__body{grid-template-columns:1fr;gap:20px}
+  .info__pullquote{font-size:1.15rem}
+  .info__details p{font-size:0.88rem}
+  .wikipedia-link{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    margin:0 6vw 24px auto;
+  }
+    .spy{left:1.4vw}
+  .spy__list{--w:32px}
+  .spy__bar{width:11px}
+  .spy__item.is-active .spy__bar{width:20px}
+}
