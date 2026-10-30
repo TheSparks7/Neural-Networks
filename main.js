@@ -2,6 +2,115 @@ gsap.registerPlugin(ScrollTrigger);
 
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const docEl = document.documentElement;
+const scrollCue = document.querySelector(".scroll-cue");
+
+const scrollbar = document.createElement("div");
+scrollbar.className = "page-scrollbar";
+scrollbar.setAttribute("role", "scrollbar");
+scrollbar.setAttribute("aria-label", "Page scroll");
+scrollbar.setAttribute("aria-orientation", "vertical");
+scrollbar.setAttribute("aria-valuemin", "0");
+scrollbar.setAttribute("aria-valuemax", "1000");
+scrollbar.tabIndex = 0;
+const scrollbarThumb = document.createElement("span");
+scrollbarThumb.className = "page-scrollbar__thumb";
+scrollbarThumb.setAttribute("aria-hidden", "true");
+scrollbar.appendChild(scrollbarThumb);
+document.body.appendChild(scrollbar);
+
+let scrollbarFrame = 0;
+let scrollbarDragOffset = 0;
+let scrollbarDragging = false;
+
+function updateScrollbar(){
+  scrollbarFrame = 0;
+  const scrollHeight = docEl.scrollHeight;
+  const viewportHeight = window.innerHeight;
+  const maxScroll = Math.max(0, scrollHeight - viewportHeight);
+  scrollbar.hidden = maxScroll === 0;
+  if (maxScroll === 0) return;
+
+  const trackHeight = scrollbar.clientHeight;
+  const thumbHeight = Math.min(trackHeight, Math.max(36, trackHeight * viewportHeight / scrollHeight));
+  const maxThumbTop = trackHeight - thumbHeight;
+  const scrollTop = Math.min(maxScroll, Math.max(0, window.scrollY || docEl.scrollTop));
+  const progress = scrollTop / maxScroll;
+  scrollbarThumb.style.height = `${thumbHeight}px`;
+  scrollbarThumb.style.transform = `translate3d(0, ${progress * maxThumbTop}px, 0)`;
+  scrollbar.setAttribute("aria-valuenow", String(Math.round(progress * 1000)));
+}
+
+function scheduleScrollbarUpdate(){
+  if (!scrollbarFrame) scrollbarFrame = requestAnimationFrame(updateScrollbar);
+}
+
+function scrollFromScrollbar(clientY, behavior){
+  const maxScroll = Math.max(0, docEl.scrollHeight - window.innerHeight);
+  const maxThumbTop = scrollbar.clientHeight - scrollbarThumb.offsetHeight;
+  if (maxScroll === 0 || maxThumbTop <= 0) return;
+  const trackTop = scrollbar.getBoundingClientRect().top;
+  const thumbTop = Math.min(maxThumbTop, Math.max(0, clientY - trackTop - scrollbarDragOffset));
+  window.scrollTo({ top: thumbTop / maxThumbTop * maxScroll, behavior });
+}
+
+gsap.set(scrollCue, { autoAlpha: 0, y: 8 });
+
+function setScrollCueVisible(visible){
+  scrollCue.classList.toggle("is-visible", visible);
+  gsap.to(scrollCue, {
+    autoAlpha: visible ? 1 : 0,
+    y: visible ? 0 : 8,
+    duration: reduce ? 0 : 0.55,
+    ease: "power2.out",
+    overwrite: "auto"
+  });
+}
+
+scrollbar.addEventListener("pointerdown", event => {
+  if (scrollbar.hidden) return;
+  const thumbRect = scrollbarThumb.getBoundingClientRect();
+  scrollbarDragging = scrollbarThumb.contains(event.target);
+  scrollbarDragOffset = scrollbarDragging ? event.clientY - thumbRect.top : scrollbarThumb.offsetHeight / 2;
+  if (scrollbarDragging) {
+    scrollbar.classList.add("is-dragging");
+    scrollbar.setPointerCapture(event.pointerId);
+  } else {
+    scrollFromScrollbar(event.clientY, reduce ? "auto" : "smooth");
+  }
+  event.preventDefault();
+});
+scrollbar.addEventListener("pointermove", event => {
+  if (scrollbarDragging) scrollFromScrollbar(event.clientY, "auto");
+});
+const stopScrollbarDrag = () => {
+  scrollbarDragging = false;
+  scrollbar.classList.remove("is-dragging");
+};
+scrollbar.addEventListener("pointerup", stopScrollbarDrag);
+scrollbar.addEventListener("pointercancel", stopScrollbarDrag);
+scrollbar.addEventListener("keydown", event => {
+  const maxScroll = Math.max(0, docEl.scrollHeight - window.innerHeight);
+  const currentScroll = window.scrollY || docEl.scrollTop;
+  const pageStep = Math.max(1, window.innerHeight * 0.9);
+  let destination;
+
+  switch (event.key) {
+    case "ArrowUp": destination = currentScroll - 40; break;
+    case "ArrowDown": destination = currentScroll + 40; break;
+    case "PageUp": destination = currentScroll - pageStep; break;
+    case "PageDown": destination = currentScroll + pageStep; break;
+    case "Home": destination = 0; break;
+    case "End": destination = maxScroll; break;
+    default: return;
+  }
+
+  event.preventDefault();
+  window.scrollTo({ top: Math.min(maxScroll, Math.max(0, destination)), behavior: reduce ? "auto" : "smooth" });
+});
+window.addEventListener("scroll", scheduleScrollbarUpdate, { passive: true });
+window.addEventListener("resize", scheduleScrollbarUpdate);
+new ResizeObserver(scheduleScrollbarUpdate).observe(document.body);
+scheduleScrollbarUpdate();
 
 /* page is locked until the intro has finished, finally did it after so muc grinding */
 docEl.classList.add("is-locked");
@@ -396,8 +505,8 @@ function initScroll(){
     {
       left:   () => window.innerWidth * 0.42,
       right:  () => window.innerWidth * 0.04,
-      top:    () => window.innerHeight * 0.08,
-      bottom: () => window.innerHeight * 0.04
+      top:    () => window.innerHeight * 0.11,
+      bottom: () => window.innerHeight * 0.08
     },
     {
       left: infoSide,
@@ -408,6 +517,17 @@ function initScroll(){
     },
     0
   );
+
+  ScrollTrigger.create({
+    trigger: scrollSpace,
+    start: "bottom 10%",
+    endTrigger: detailsSection,
+    end: "top 85%",
+    onEnter: () => setScrollCueVisible(true),
+    onEnterBack: () => setScrollCueVisible(true),
+    onLeave: () => setScrollCueVisible(false),
+    onLeaveBack: () => setScrollCueVisible(false)
+  });
 }
 
 function initPracticalTitleScroll(){
@@ -423,11 +543,6 @@ function initPracticalTitleScroll(){
   };
 
   if (isMobile) {
-    const practicalVisibility = ScrollTrigger.create({
-      ...scrollTrigger,
-      onToggle: self => docEl.classList.toggle("is-practical-active", self.isActive)
-    });
-    docEl.classList.toggle("is-practical-active", practicalVisibility.isActive);
     return;
   }
 
@@ -558,12 +673,14 @@ tl.eventCallback("onComplete", () => {
   initPracticalTitleScroll();
   requestAnimationFrame(() => ScrollTrigger.refresh());
 
+  if (reduce || window.innerWidth <= 768) setScrollCueVisible(true);
   if (heroTitle.matches(":hover")) titleHover.play();
 });
 
 document.fonts.ready.then(() => {
   if (reduce) {
     tl.progress(1);
+    gsap.set(heroTitle, { clearProps: "transform,filter" });
     docEl.classList.remove("is-locked");
   } else {
     tl.play();
