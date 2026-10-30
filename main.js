@@ -294,7 +294,7 @@ tl.to(wikipediaLink, {
 const spyEl = document.getElementById("spy");
 const spyItems = Array.from(spyEl.querySelectorAll(".spy__item"));
 const spyLinks = spyItems.map(item => item.querySelector(".spy__link"));
-const spyLast = spyItems.length - 1;
+const spyTargets = spyLinks.map(link => document.querySelector(link.getAttribute("href")));
 let spyActive = -1;
 
 function setSpyActive(index){
@@ -309,18 +309,28 @@ function setSpyActive(index){
 }
 
 function spyUpdate(){
-  const max = docEl.scrollHeight - window.innerHeight;
-  const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-  setSpyActive(Math.min(spyLast, Math.max(0, Math.round(p * spyLast))));
+  let activeIndex = 0;
+  spyTargets.forEach((target, index) => {
+    if (target && target.getBoundingClientRect().top <= 1) activeIndex = index;
+  });
+  setSpyActive(activeIndex);
 }
 
-spyLinks.forEach((link, i) => {
+spyLinks.forEach(link => {
   link.addEventListener("click", event => {
     event.preventDefault();
-    const max = docEl.scrollHeight - window.innerHeight;
-    window.scrollTo({
-      top: Math.round((i / spyLast) * max),
-      behavior: reduce ? "auto" : "smooth"
+    const target = document.querySelector(link.getAttribute("href"));
+    if (!target) return;
+    if (link.getAttribute("href") === "#overview" && window.innerWidth <= 768) {
+  window.scrollTo({
+    top: 0,
+    behavior: reduce ? "auto" : "smooth"
+  });
+  return;
+}
+    target.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start"
     });
   });
 });
@@ -335,6 +345,10 @@ tl.to(spyEl, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power2.out" }, 3.9);
 /* No Comments bruv */
 
 let scrollBuilt = false;
+
+const overviewTitleX = () => heroTitle.offsetWidth / 2 - window.innerWidth * 0.45;
+const overviewTitleYIn = () => heroTitle.offsetHeight * 0.225;
+const overviewTitleYOut = () => heroTitle.offsetHeight / 2 - window.innerHeight * 0.44;
 
 function initScroll(){
   if (scrollBuilt || reduce) return;
@@ -352,26 +366,28 @@ function initScroll(){
   const infoTop   = () => Math.max(window.innerHeight * 0.045,
                                    (window.innerHeight - contentH()) / 2);
 
-  /* title maths itself, somehow this gibberish works        */
-  const titleX    = () => heroTitle.offsetWidth / 2 - window.innerWidth * 0.45;
-  const titleYIn  = () => heroTitle.offsetHeight * 0.225;
-  const titleYOut = () => heroTitle.offsetHeight / 2 - window.innerHeight * 0.44;
-
   const st = gsap.timeline({
     defaults: { ease: "power2.inOut" },
     scrollTrigger: {
       trigger: scrollSpace,
       start: "top top",
       end: () => "+=" + Math.round(window.innerHeight * 1.35),
-      scrub: 1,
+      scrub: true,
+      snap: {
+        snapTo: progress => Math.round(progress),
+        duration: { min: 0.25, max: 0.45 },
+        delay: 0.1,
+        ease: "power2.out",
+        inertia: false
+      },
       invalidateOnRefresh: true
     }
   });
 
 
   st.fromTo(heroTitle,
-    { x: titleX, y: titleYIn, scale: 0.55 },
-    { x: titleX, y: titleYOut, scale: 0.30, duration: 1, ease: "power1.inOut" },
+    { x: overviewTitleX, y: overviewTitleYIn, scale: 0.55 },
+    { x: overviewTitleX, y: overviewTitleYOut, scale: 0.30, duration: 1, ease: "power1.inOut" },
     0
   );
 
@@ -394,6 +410,118 @@ function initScroll(){
   );
 }
 
+function initPracticalTitleScroll(){
+  const practicalSection = document.querySelector(".mnist-demo");
+  if (reduce || !practicalSection) return;
+
+  const isMobile = window.innerWidth <= 768;
+  const scrollTrigger = {
+    trigger: practicalSection,
+    start: "top bottom",
+    end: "bottom top",
+    invalidateOnRefresh: true
+  };
+
+  if (isMobile) {
+    const practicalVisibility = ScrollTrigger.create({
+      ...scrollTrigger,
+      onToggle: self => docEl.classList.toggle("is-practical-active", self.isActive)
+    });
+    docEl.classList.toggle("is-practical-active", practicalVisibility.isActive);
+    return;
+  }
+
+  const cornerMarginX = () => Math.max(16, window.innerWidth * 0.03);
+  const cornerMarginY = () => Math.max(14, window.innerHeight * 0.02);
+  const cornerScale = () => Math.min(
+    0.2,
+    (window.innerWidth - cornerMarginX() * 2) * 0.34 / heroTitle.offsetWidth,
+    Math.min(64, window.innerHeight * 0.075) / heroTitle.offsetHeight
+  );
+  const cornerX = () => cornerMarginX() - (window.innerWidth - heroTitle.offsetWidth) / 2;
+  const cornerY = () => cornerMarginY() - (window.innerHeight - heroTitle.offsetHeight) / 2;
+
+  const practicalTitleTimeline = gsap.timeline({
+    scrollTrigger: {
+      ...scrollTrigger,
+      scrub: true
+    }
+  });
+
+  practicalTitleTimeline.fromTo(heroTitle,
+    {
+      x: overviewTitleX,
+      y: overviewTitleYOut,
+      scale: 0.30
+    },
+    {
+      x: cornerX,
+      y: cornerY,
+      scale: cornerScale,
+      duration: 0.14,
+      ease: "power2.inOut",
+      immediateRender: false
+    },
+    0
+  ).to(heroTitle, {
+    x: overviewTitleX,
+    y: overviewTitleYOut,
+    scale: 0.30,
+    duration: 0.12,
+    ease: "power2.inOut"
+  }, 0.88);
+}
+
+const detailsSection = document.querySelector(".details");
+const detailsStage = detailsSection.querySelector(".details__stage");
+const detailsCards = Array.from(detailsStage.querySelectorAll(".details__card"));
+const detailsTransitions = detailsCards.length - 1;
+let detailsTimeline;
+
+function initDetailsScroll(){
+  if (detailsTimeline || reduce || window.innerWidth <= 768 || detailsCards.length < 2) return;
+
+  gsap.set(detailsCards, { autoAlpha: 0, yPercent: 14 });
+  gsap.set(detailsCards[0], { autoAlpha: 1, yPercent: 0 });
+
+  detailsTimeline = gsap.timeline({
+    defaults: { ease: "power2.inOut" },
+    scrollTrigger: {
+      trigger: detailsSection,
+      pin: detailsStage,
+      pinSpacing: true,
+      start: "top top",
+      end: () => "+=" + Math.round(detailsTransitions * window.innerHeight),
+      scrub: true,
+      snap: {
+        snapTo: progress => Math.round(progress * detailsTransitions) / detailsTransitions,
+        duration: { min: 0.2, max: 0.45 },
+        delay: 0.1,
+        ease: "power2.out",
+        inertia: false
+      },
+      anticipatePin: 1,
+      invalidateOnRefresh: true
+    }
+  });
+
+  for (let i = 1; i <= detailsTransitions; i++) {
+    detailsTimeline
+      .to(detailsCards[i - 1], {
+        autoAlpha: 0,
+        yPercent: -12,
+        duration: 1
+      }, i - 1)
+      .fromTo(detailsCards[i], {
+        autoAlpha: 0,
+        yPercent: 14
+      }, {
+        autoAlpha: 1,
+        yPercent: 0,
+        duration: 1
+      }, i - 1);
+  }
+}
 const titleHover = gsap.timeline({ paused: true });
 if (!reduce) {
   titleHover.to(allChars, {
@@ -426,7 +554,10 @@ heroTitle.addEventListener("focusout", event => {
 tl.eventCallback("onComplete", () => {
   docEl.classList.remove("is-locked");
   initScroll();
+  initDetailsScroll();
+  initPracticalTitleScroll();
   requestAnimationFrame(() => ScrollTrigger.refresh());
+
   if (heroTitle.matches(":hover")) titleHover.play();
 });
 
