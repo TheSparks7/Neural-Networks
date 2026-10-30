@@ -60,20 +60,119 @@
 <nav class="spy" id="spy" aria-label="Sections">
   <ul class="spy__list">
     <li class="spy__item"><a class="spy__link" href="#overview"><span class="spy__bar"></span><span class="spy__label">Overview</span></a></li>
-    <li class="spy__item"><a class="spy__link" href="#neurons"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#details"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#weights"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#training"><span class="spy__bar"></span><span class="spy__label">Future</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#source"><span class="spy__bar"></span><span class="spy__label">Conclusion</span></a></li>
   </ul>
 </nav>
-<div class="scroll-space" aria-hidden="true"></div>
+<section class="scroll-space" id="overview" aria-label="Overview"></section>
+<div class="overview-settle-space" aria-hidden="true"></div>
+
+<section class="details" id="details" aria-label="Details">
+  <div class="details__stage">
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">01 / Model</p>
+        <h2 class="details__title">The network</h2>
+        <p class="details__text">At its core, an artificial neural network is just a bunch of math nodes wired together to loosely mimic how biological brains process information. Data enters through an input layer, bounces through a series of hidden layers where the real heavy lifting happens, and spits out a result at the end. It figures things out not by following a rigid rulebook, but by constantly tweaking how strongly these connected nodes talk to each other.</p>
+      </div>
+    </article>
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">02 / Neurons</p>
+        <h2 class="details__title">Neurons</h2>
+        <p class="details__text">An individual neuron is basically a tiny decision-maker. It takes a bunch of inputs, multiplies each by a specific weight to see how much it should actually care about them, adds them all up, and pushes the total through an activation function. Whatever survives that process gets passed down the line to feed the next layer.</p>
+      </div>
+    </article>
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">03 / Weights</p>
+        <h2 class="details__title">Weights</h2>
+        <p class="details__text">Weights are the actual knobs and dials of the network. Every connection has one, acting as a multiplier that decides whether a signal gets amplified or muted. When a network learns, it isn't rewriting its own source code at all; rather it's just slowly turning these dials until the math finally adds up to the right answers.</p>
+      </div>
+    </article>
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">04 / Layers</p>
+        <h2 class="details__title">Layers</h2>
+        <p class="details__text">Instead of dumping everything into one chaotic mess, neurons are stacked into organized tiers. The input layer takes raw data as it is, the output layer gives you the final guess, and all the hidden layers in between do the tedious work of breaking down patterns that turn raw pixels into edges, edges into shapes, and shapes into actual concepts.</p>
+      </div>
+    </article>
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">05 / Activation</p>
+        <h2 class="details__title">Activation</h2>
+        <p class="details__text">Without activation functions, stacking a million layers together is completely pointless because, mathematically speaking, multiple linear steps just collapse into one giant, boring straight line. Functions like ReLU, sigmoid, or tanh inject a bit of necessary non-linearity, allowing the network to wrap its head around complicated, messy real-world data instead of oversimplifying everything.</p>
+      </div>
+    </article>
+
+    <article class="details__card">
+      <div class="details__inner">
+        <p class="details__index">06 / Learning</p>
+        <h2 class="details__title">Learning</h2>
+        <p class="details__text">Training is essentially an endless loop of making mistakes and adjusting course. The network takes a guess, checks how far off it was from the actual answer, and sends that error report backward through the system. Through a process called backpropagation and gradient descent, every single weight gets a tiny nudge in the right direction until the network stops screwing up quite so much.</p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section class="mnist-demo" id="weights" aria-label="Practical">
+  <div class="mnist-demo__inner">
+    <p class="mnist-demo__index">04 / Practical - Get ready for your mind to be blown</p>
+    <h2 class="mnist-demo__title">Draw a digit</h2>
+    <p class="mnist-demo__lede">
+      The network below is a frozen stack of weights; so, no images, no dataset, just numbers.
+      Draw a numeral and watch it decide. Isn't it fascinating? Well, it gets even better: the network is only ~250KB, yet it can recognize digits with ~99% accuracy. That's the power of distilled knowledge.
+    </p>
+
+    <div class="mnist-demo__grid">
+      <div class="mnist-demo__canvas-wrap">
+        <canvas id="mnist-canvas" width="280" height="280"
+                aria-label="Draw a digit here"></canvas>
+        <div class="mnist-demo__canvas-actions">
+          <button type="button" class="mnist-demo__clear" id="mnist-clear">Clear</button>
+          <span class="mnist-demo__status" id="mnist-status">loading model…</span>
+        </div>
+      </div>
+
+      <div class="mnist-demo__readout">
+        <div class="mnist-demo__prediction">
+          <span class="mnist-demo__digit" id="mnist-digit">–</span>
+          <span class="mnist-demo__confidence" id="mnist-confidence">—</span>
+        </div>
+
+        <div class="mnist-demo__bars" id="mnist-bars"></div>
+
+        <dl class="mnist-demo__stats">
+          <div><dt>Frozen weights</dt><dd id="mnist-size">…</dd></div>
+          <div><dt>Parameters</dt><dd id="mnist-params">…</dd></div>
+          <div><dt>Trained on</dt><dd>60,000 <abbr title="MNIST is a dataset of 70,000 handwritten digit images, each labeled with its correct number. 1 sample = 1 image.">MNIST samples</abbr></dd></div>
+          <div><dt>Accuracy</dt><dd>~99%</dd></div>
+          <div><dt>Images sent to server</dt><dd>0</dd></div> <!--I don't actually know how to send it to a server, so ofc you can believe that-->
+        </dl>
+
+        <p class="mnist-demo__caption">
+          This file contains only numbers. The training set is never downloaded —
+          what you get is the distilled result, a few hundred kilobytes of weights
+          that have already seen everything.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="placeholder" id="training" aria-label="Future"></section>
+<section class="placeholder" id="source" aria-label="Conclusion"></section>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-
-
-
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="mnist-demo.js" defer></script>
 </body>
 </html>
