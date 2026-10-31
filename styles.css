@@ -256,6 +256,19 @@ body{
   letter-spacing:0;
 }
 
+.concept-link{
+  color:inherit;
+  text-decoration:underline;
+  text-decoration-color:rgba(255,92,46,.62);
+  text-decoration-thickness:1px;
+  text-underline-offset:.18em;
+  border-radius:1px;
+}
+.concept-link:focus-visible{
+  outline:1px solid rgba(255,92,46,.65);
+  outline-offset:3px;
+}
+
 .wikipedia-link{
   position:fixed;
   right:4vw;
@@ -569,15 +582,15 @@ body{
   .spy__list{--w:32px}
   .spy__bar{width:11px}
   .spy__item.is-active .spy__bar{width:20px}
-   .details__stage{height:auto;overflow:visible}
+  .details__stage{height:auto;overflow:visible}
   .details__card{
-  position:relative;
-  inset:auto;
-  padding:10vh 6vw;
-  opacity:1;
-  visibility:visible;
-  transform:none;
-}
+    position:relative;
+    inset:auto;
+    padding:10vh 6vw;
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
   .details__inner{padding-top:20px}
   .details__text{font-size:.88rem}
   .placeholder{min-height:60vh}

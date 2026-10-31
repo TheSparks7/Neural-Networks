@@ -57,9 +57,9 @@
     <path d="M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.045c.924-.005 5.401 0 5.401 0l.051.045v.434c0 .119-.075.176-.225.176l-.564.031c-.485.029-.727.164-.727.436 0 .135.053.33.166.601 1.082 2.646 4.818 10.521 4.818 10.521l.136.046 2.411-4.81-.482-1.067-1.658-3.264s-.318-.654-.428-.872c-.728-1.443-.712-1.518-1.447-1.617-.207-.023-.313-.05-.313-.149v-.468l.06-.045h4.292l.113.037v.451c0 .105-.076.15-.227.15l-.308.047c-.792.061-.661.381-.136 1.422l1.582 3.252 1.758-3.504c.293-.64.233-.801.111-.947-.07-.084-.305-.22-.812-.24l-.201-.021c-.052 0-.098-.015-.145-.051-.045-.031-.067-.076-.067-.129v-.427l.061-.045c1.247-.008 4.043 0 4.043 0l.059.045v.436c0 .121-.059.178-.193.178-.646.03-.782.095-1.023.439-.12.186-.375.589-.646 1.039l-2.301 4.273-.065.135 2.792 5.712.17.048 4.396-10.438c.154-.422.129-.722-.064-.895-.197-.172-.346-.273-.857-.295l-.42-.016c-.061 0-.105-.014-.152-.045-.043-.029-.072-.075-.072-.119v-.436l.059-.045h4.961l.041.045v.437c0 .119-.074.18-.209.18-.648.03-1.127.18-1.443.421-.314.255-.557.616-.736 1.067 0 0-4.043 9.258-5.426 12.339-.525 1.007-1.053.917-1.503-.031-.571-1.171-1.773-3.786-2.646-5.71l.053-.036z"/>
   </svg>
 </a>
-<a class="scroll-cue" href="#details" aria-label="Scroll to explore neurons, weights, layers, activation, and learning">
+<a class="scroll-cue" href="#practical" aria-label="Scroll to explore the practical neural network demo">
   <span class="scroll-cue__prompt">Scroll to explore</span>
-  <span class="scroll-cue__topics">Neurons · weights · layers · activation · learning</span>
+  <span class="scroll-cue__topics">Draw a digit · watch the network predict</span>
   <svg class="scroll-cue__network" viewBox="0 0 48 30" aria-hidden="true">
     <path class="scroll-cue__link" d="M24 4 11 14M24 4 37 14M11 14l13 12m13-12L24 26"/>
     <circle class="scroll-cue__node scroll-cue__node--top" cx="24" cy="4" r="2.5"/>
@@ -71,8 +71,8 @@
 <nav class="spy" id="spy" aria-label="Sections">
   <ul class="spy__list">
     <li class="spy__item"><a class="spy__link" href="#overview"><span class="spy__bar"></span><span class="spy__label">Overview</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#practical"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#details"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
-    <li class="spy__item"><a class="spy__link" href="#weights"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#training"><span class="spy__bar"></span><span class="spy__label">Future</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#source"><span class="spy__bar"></span><span class="spy__label">Conclusion</span></a></li>
   </ul>
@@ -80,61 +80,7 @@
 <section class="scroll-space" id="overview" aria-label="Overview"></section>
 <div class="overview-settle-space" aria-hidden="true"></div>
 
-<section class="details" id="details" aria-label="Details">
-  <div class="details__stage">
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">01 / Model</p>
-        <h2 class="details__title">The network</h2>
-        <p class="details__text">At its core, an artificial neural network is just a bunch of math nodes wired together to loosely mimic how biological brains process information. Data enters through an input layer, bounces through a series of hidden layers where the real heavy lifting happens, and spits out a result at the end. It figures things out not by following a rigid rulebook, but by constantly tweaking how strongly these connected nodes talk to each other.</p>
-      </div>
-    </article>
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">02 / Neurons</p>
-        <h2 class="details__title">Neurons</h2>
-        <p class="details__text">An individual neuron is basically a tiny decision-maker. It takes a bunch of inputs, multiplies each by a specific weight to see how much it should actually care about them, adds them all up, and pushes the total through an activation function. Whatever survives that process gets passed down the line to feed the next layer.</p>
-      </div>
-    </article>
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">03 / Weights</p>
-        <h2 class="details__title">Weights</h2>
-        <p class="details__text">Weights are the actual knobs and dials of the network. Every connection has one, acting as a multiplier that decides whether a signal gets amplified or muted. When a network learns, it isn't rewriting its own source code at all; rather it's just slowly turning these dials until the math finally adds up to the right answers.</p>
-      </div>
-    </article>
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">04 / Layers</p>
-        <h2 class="details__title">Layers</h2>
-        <p class="details__text">Instead of dumping everything into one chaotic mess, neurons are stacked into organized tiers. The input layer takes raw data as it is, the output layer gives you the final guess, and all the hidden layers in between do the tedious work of breaking down patterns that turn raw pixels into edges, edges into shapes, and shapes into actual concepts.</p>
-      </div>
-    </article>
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">05 / Activation</p>
-        <h2 class="details__title">Activation</h2>
-        <p class="details__text">Without activation functions, stacking a million layers together is completely pointless because, mathematically speaking, multiple linear steps just collapse into one giant, boring straight line. Functions like ReLU, sigmoid, or tanh inject a bit of necessary non-linearity, allowing the network to wrap its head around complicated, messy real-world data instead of oversimplifying everything.</p>
-      </div>
-    </article>
-
-    <article class="details__card">
-      <div class="details__inner">
-        <p class="details__index">06 / Learning</p>
-        <h2 class="details__title">Learning</h2>
-        <p class="details__text">Training is essentially an endless loop of making mistakes and adjusting course. The network takes a guess, checks how far off it was from the actual answer, and sends that error report backward through the system. Through a process called backpropagation and gradient descent, every single weight gets a tiny nudge in the right direction until the network stops screwing up quite so much.</p>
-      </div>
-    </article>
-
-  </div>
-</section>
-
-<section class="mnist-demo" id="weights" aria-label="Practical">
+<section class="mnist-demo" id="practical" aria-label="Practical">
   <div class="mnist-demo__inner">
     <p class="mnist-demo__index">Practical - Hands on experience</p>
     <h2 class="mnist-demo__title">Draw a digit</h2>
@@ -176,6 +122,52 @@
         </p>
       </div>
     </div>
+  </div>
+</section>
+<section class="details" id="details" aria-label="Details">
+  <div class="details__stage">
+    <article class="details__card" id="details-network">
+      <div class="details__inner">
+        <p class="details__index">01 / Model</p>
+        <h2 class="details__title">The network</h2>
+        <p class="details__text">At its core, an artificial neural network is just a bunch of math nodes wired together to loosely mimic how biological brains process information. Data enters through an input layer, bounces through a series of hidden layers where the real heavy lifting happens, and spits out a result at the end. It figures things out not by following a rigid rulebook, but by constantly tweaking how strongly these connected nodes talk to each other.</p>
+      </div>
+    </article>
+    <article class="details__card" id="details-neurons">
+      <div class="details__inner">
+        <p class="details__index">02 / Neurons</p>
+        <h2 class="details__title">Neurons</h2>
+        <p class="details__text">An individual neuron is basically a tiny decision-maker. It takes a bunch of inputs, multiplies each by a specific weight to see how much it should actually care about them, adds them all up, and pushes the total through an activation function. Whatever survives that process gets passed down the line to feed the next layer.</p>
+      </div>
+    </article>
+    <article class="details__card" id="details-weights">
+      <div class="details__inner">
+        <p class="details__index">03 / Weights</p>
+        <h2 class="details__title">Weights</h2>
+        <p class="details__text">Weights are the actual knobs and dials of the network. Every connection has one, acting as a multiplier that decides whether a signal gets amplified or muted. When a network learns, it isn't rewriting its own source code at all; rather it's just slowly turning these dials until the math finally adds up to the right answers.</p>
+      </div>
+    </article>
+    <article class="details__card" id="details-layers">
+      <div class="details__inner">
+        <p class="details__index">04 / Layers</p>
+        <h2 class="details__title">Layers</h2>
+        <p class="details__text">Instead of dumping everything into one chaotic mess, neurons are stacked into organized tiers. The input layer takes raw data as it is, the output layer gives you the final guess, and all the hidden layers in between do the tedious work of breaking down patterns that turn raw pixels into edges, edges into shapes, and shapes into actual concepts.</p>
+      </div>
+    </article>
+    <article class="details__card" id="details-activation">
+      <div class="details__inner">
+        <p class="details__index">05 / Activation</p>
+        <h2 class="details__title">Activation</h2>
+        <p class="details__text">Without activation functions, stacking a million layers together is completely pointless because, mathematically speaking, multiple linear steps just collapse into one giant, boring straight line. Functions like ReLU, sigmoid, or tanh inject a bit of necessary non-linearity, allowing the network to wrap its head around complicated, messy real-world data instead of oversimplifying everything.</p>
+      </div>
+    </article>
+    <article class="details__card" id="details-learning">
+      <div class="details__inner">
+        <p class="details__index">06 / Learning</p>
+        <h2 class="details__title">Learning</h2>
+        <p class="details__text">Training is essentially an endless loop of making mistakes and adjusting course. The network takes a guess, checks how far off it was from the actual answer, and sends that error report backward through the system. Through a process called backpropagation and gradient descent, every single weight gets a tiny nudge in the right direction until the network stops screwing up quite so much.</p>
+      </div>
+    </article>
   </div>
 </section>
 <section class="placeholder" id="training" aria-label="Future"></section>
