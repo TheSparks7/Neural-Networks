@@ -458,6 +458,94 @@ body{
   scale:1.2;
   margin-block:.15rem;
 }
+
+@media (max-width:768px){
+  .hero-stage{
+    position:relative;
+    inset:auto;
+    min-height:100vh;
+    min-height:100svh;
+  }
+  .scroll-space,
+  .overview-settle-space{display:none}
+  .info{
+    position:relative;
+    inset:auto;
+    width:min(820px,88vw);
+    max-width:none;
+    margin:0 auto;
+    padding:6vh 0 4vh;
+    justify-content:flex-start;
+    gap:clamp(24px,4vh,40px);
+  }
+  .info__body{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+  .info__details p{font-size:clamp(15px,1.8vw,17px)}
+  .wikipedia-link{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    margin:0 0 0 auto;
+  }
+  .scroll-cue{
+    position:relative;
+    left:auto;
+    right:auto;
+    bottom:auto;
+    width:fit-content;
+    max-width:88vw;
+    margin:0 auto;
+    white-space:normal;
+    transform:translateY(8px);
+  }
+  .scroll-cue__topics{line-height:1.6}
+}
+
+@media (min-width:769px) and (max-height:960px){
+  .info{
+    top:5vh;
+    left:36vw;
+    bottom:4vh;
+    justify-content:center;
+    gap:clamp(12px,2vh,20px);
+  }
+  .info__lede{
+    font-size:clamp(1.15rem,1.6vw,1.7rem);
+    line-height:1.22;
+  }
+  .info__body{
+    grid-template-columns:.8fr 1.2fr;
+    gap:clamp(16px,2vw,24px);
+    padding-top:14px;
+    padding-bottom:8px;
+  }
+  .info__pullquote{font-size:clamp(1rem,1.3vw,1.4rem)}
+  .info__details{gap:10px}
+  .info__details p{
+    font-size:clamp(12px,.9vw,15px);
+    line-height:1.5;
+  }
+  .wikipedia-link{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    align-self:flex-end;
+    flex:0 0 24px;
+  }
+  .scroll-cue{
+    position:relative;
+    left:auto;
+    right:auto;
+    bottom:auto;
+    margin:0 auto;
+    white-space:normal;
+    transform:translateY(8px);
+  }
+  .scroll-cue__topics{line-height:1.6}
+}
+
 .details{
   position:relative;
   z-index:250;
@@ -752,6 +840,7 @@ body{
     padding:20px 6vw;
   }
 }
+
 @media (prefers-reduced-motion:reduce){
   .scroll-cue{
     position:relative;

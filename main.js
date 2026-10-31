@@ -3,6 +3,42 @@ gsap.registerPlugin(ScrollTrigger);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const docEl = document.documentElement;
 const scrollCue = document.querySelector(".scroll-cue");
+const isNarrowLayout = () => window.innerWidth <= 768;
+const isOverviewFlowLayout = isNarrowLayout;
+const isStackedLayout = isNarrowLayout;
+const scrollPositionKey = "neural-networks-scroll-y";
+const navigationEntry = performance.getEntriesByType("navigation")[0];
+let restoredScrollY = 0;
+try {
+  const storedScrollY = Number(sessionStorage.getItem(scrollPositionKey));
+  if (Number.isFinite(storedScrollY) && storedScrollY > 0) restoredScrollY = storedScrollY;
+} catch (error) {
+  console.warn("Could not read the saved scroll position:", error);
+}
+const restoreScrollOnReload = navigationEntry?.type === "reload" && restoredScrollY > 0;
+if (restoreScrollOnReload && "scrollRestoration" in history) history.scrollRestoration = "manual";
+
+let scrollPositionFrame = 0;
+let scrollPositionTracking = false;
+function persistScrollPosition(){
+  scrollPositionFrame = 0;
+  if (!scrollPositionTracking) return;
+  try {
+    sessionStorage.setItem(scrollPositionKey, String(window.scrollY || docEl.scrollTop));
+  } catch (error) {
+    console.warn("Could not save the scroll position:", error);
+  }
+}
+
+function scheduleScrollPositionSave(){
+  if (!scrollPositionFrame) scrollPositionFrame = requestAnimationFrame(persistScrollPosition);
+}
+
+window.addEventListener("scroll", scheduleScrollPositionSave, { passive: true });
+window.addEventListener("pagehide", () => {
+  if (scrollPositionFrame) cancelAnimationFrame(scrollPositionFrame);
+  persistScrollPosition();
+});
 
 const scrollbar = document.createElement("div");
 scrollbar.className = "page-scrollbar";
@@ -21,6 +57,10 @@ document.body.appendChild(scrollbar);
 let scrollbarFrame = 0;
 let scrollbarDragOffset = 0;
 let scrollbarDragging = false;
+let responsiveAnimationsReady = false;
+let previousOverviewFlowLayout = null;
+let previousStackedLayout = null;
+let responsiveResizeTimer = 0;
 
 function updateScrollbar(){
   scrollbarFrame = 0;
@@ -342,9 +382,9 @@ tl.call(() => {
 tl.set(heroTitle, { filter: "none" }, 2.5);
 
 tl.to(heroTitle, {
-  x: () => window.innerWidth <= 768 ? 0 : window.innerWidth * 0.05 - heroTitle.getBoundingClientRect().left,
-  y: () => window.innerWidth <= 768 ? 0 : window.innerHeight / 2 - heroTitle.getBoundingClientRect().top - heroTitle.offsetHeight * 0.55 / 2,
-  scale: () => window.innerWidth <= 768 ? 1 : 0.55,
+  x: () => isNarrowLayout() ? 0 : window.innerWidth * 0.05 - heroTitle.getBoundingClientRect().left,
+  y: () => isNarrowLayout() ? 0 : window.innerHeight / 2 - heroTitle.getBoundingClientRect().top - heroTitle.offsetHeight * 0.55 / 2,
+  scale: () => isNarrowLayout() ? 1 : 0.55,
   duration: 1.0,
   ease: "expo.inOut"
 }, 2.5);
@@ -433,7 +473,7 @@ spyLinks.forEach(link => {
     event.preventDefault();
     const target = document.querySelector(link.getAttribute("href"));
     if (!target) return;
-    if (link.getAttribute("href") === "#overview" && window.innerWidth <= 768) {
+    if (link.getAttribute("href") === "#overview" && isNarrowLayout()) {
   window.scrollTo({
     top: 0,
     behavior: reduce ? "auto" : "smooth"
@@ -454,13 +494,15 @@ spyUpdate();
 gsap.set(spyEl, { autoAlpha: 0, x: -14 });
 tl.to(spyEl, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power2.out" }, 3.9);
 
-let scrollBuilt = false;
 const practicalSection = document.querySelector(".mnist-demo");
 const detailsSection = document.querySelector(".details");
 const detailsStage = detailsSection.querySelector(".details__stage");
 const detailsCards = Array.from(detailsStage.querySelectorAll(".details__card"));
 const detailsTransitions = detailsCards.length - 1;
 let detailsTimeline;
+let overviewTimeline;
+let overviewCueTrigger;
+let practicalTitleTimeline;
 const mechanicsSection = document.querySelector(".mechanics");
 const mechanicsStage = mechanicsSection.querySelector(".mechanics__stage");
 const mechanicsCards = Array.from(mechanicsStage.querySelectorAll(".mechanics__card"));
@@ -472,9 +514,7 @@ const overviewTitleYIn = () => heroTitle.offsetHeight * 0.225;
 const overviewTitleYOut = () => heroTitle.offsetHeight / 2 - window.innerHeight * 0.44;
 
 function initScroll(){
-  if (scrollBuilt || reduce) return;
-  if (window.innerWidth <= 768) return;
-  scrollBuilt = true;
+  if (overviewTimeline || reduce || isOverviewFlowLayout()) return;
 
   const infoEl     = document.querySelector(".info");
   const infoLedeEl = document.querySelector(".info__lede");
@@ -486,8 +526,9 @@ function initScroll(){
   const infoSide  = () => (window.innerWidth - infoWidth()) / 2;
   const infoTop   = () => Math.max(window.innerHeight * 0.045,
                                    (window.innerHeight - contentH()) / 2);
+  const infoRowGap = getComputedStyle(infoEl).rowGap;
 
-  const st = gsap.timeline({
+  overviewTimeline = gsap.timeline({
     defaults: { ease: "power2.inOut" },
     scrollTrigger: {
       trigger: scrollSpace,
@@ -506,31 +547,33 @@ function initScroll(){
   });
 
 
-  st.fromTo(heroTitle,
+  overviewTimeline.fromTo(heroTitle,
     { x: overviewTitleX, y: overviewTitleYIn, scale: 0.55 },
     { x: overviewTitleX, y: overviewTitleYOut, scale: 0.30, duration: 1, ease: "power1.inOut" },
     0
   );
 
   /*  the description slides from the right column to the centre as it looks so cool */
-  st.fromTo(infoEl,
+  overviewTimeline.fromTo(infoEl,
     {
-      left:   () => window.innerWidth * 0.42,
-      right:  () => window.innerWidth * 0.04,
-      top:    () => window.innerHeight * 0.11,
-      bottom: () => window.innerHeight * 0.08
+      left:   () => getComputedStyle(infoEl).left,
+      right:  () => getComputedStyle(infoEl).right,
+      top:    () => getComputedStyle(infoEl).top,
+      bottom: () => getComputedStyle(infoEl).bottom,
+      rowGap: infoRowGap
     },
     {
       left: infoSide,
       right: infoSide,
       top: infoTop,
       bottom: infoTop,
+      rowGap: () => infoRowGap,
       duration: 1
     },
     0
   );
 
-  ScrollTrigger.create({
+  overviewCueTrigger = ScrollTrigger.create({
     trigger: scrollSpace,
     start: "bottom 10%",
     endTrigger: practicalSection,
@@ -543,19 +586,14 @@ function initScroll(){
 }
 
 function initPracticalTitleScroll(){
-  if (reduce || !practicalSection) return;
-
-  const isMobile = window.innerWidth <= 768;
+  if (practicalTitleTimeline || reduce || !practicalSection) return;
+  if (isNarrowLayout()) return;
   const scrollTrigger = {
     trigger: practicalSection,
     start: "top bottom",
     end: "bottom top",
     invalidateOnRefresh: true
   };
-
-  if (isMobile) {
-    return;
-  }
 
   const cornerMarginX = () => Math.max(16, window.innerWidth * 0.03);
   const cornerMarginY = () => Math.max(14, window.innerHeight * 0.02);
@@ -567,7 +605,7 @@ function initPracticalTitleScroll(){
   const cornerX = () => cornerMarginX() - (window.innerWidth - heroTitle.offsetWidth) / 2;
   const cornerY = () => cornerMarginY() - (window.innerHeight - heroTitle.offsetHeight) / 2;
 
-  const practicalTitleTimeline = gsap.timeline({
+  practicalTitleTimeline = gsap.timeline({
     scrollTrigger: {
       ...scrollTrigger,
       scrub: true
@@ -599,7 +637,7 @@ function initPracticalTitleScroll(){
 }
 
 function initDetailsScroll(){
-  if (detailsTimeline || reduce || window.innerWidth <= 768 || detailsCards.length < 2) return;
+  if (detailsTimeline || reduce || isStackedLayout() || detailsCards.length < 2) return;
 
   gsap.set(detailsCards, { autoAlpha: 0, yPercent: 14 });
   gsap.set(detailsCards[0], { autoAlpha: 1, yPercent: 0 });
@@ -644,7 +682,7 @@ function initDetailsScroll(){
 }
 
 function initMechanicsScroll(){
-  if (mechanicsTimeline || reduce || window.innerWidth <= 768 || mechanicsCards.length < 2) return;
+  if (mechanicsTimeline || reduce || isStackedLayout() || mechanicsCards.length < 2) return;
 
   gsap.set(mechanicsCards, { autoAlpha: 0, xPercent: 14 });
   gsap.set(mechanicsCards[0], { autoAlpha: 1, xPercent: 0 });
@@ -688,6 +726,94 @@ function initMechanicsScroll(){
   }
 }
 
+function killScrollTimeline(timeline){
+  if (!timeline) return;
+  if (timeline.scrollTrigger) timeline.scrollTrigger.kill();
+  timeline.kill();
+}
+
+function resetOverviewAnimations(){
+  if (overviewCueTrigger) {
+    overviewCueTrigger.kill();
+    overviewCueTrigger = null;
+  }
+  killScrollTimeline(overviewTimeline);
+  overviewTimeline = null;
+  killScrollTimeline(practicalTitleTimeline);
+  practicalTitleTimeline = null;
+  gsap.set(heroTitle, { clearProps: "transform" });
+  gsap.set(".info", { clearProps: "left,right,top,bottom,transform" });
+  gsap.set([".info__lede", ".info__body", ".info__body > *"], {
+    clearProps: "opacity,visibility,transform"
+  });
+  gsap.set(wikipediaLink, { clearProps: "opacity,visibility,transform" });
+}
+
+function resetSectionAnimations(){
+  killScrollTimeline(detailsTimeline);
+  detailsTimeline = null;
+  gsap.set(detailsCards, { clearProps: "all" });
+
+  killScrollTimeline(mechanicsTimeline);
+  mechanicsTimeline = null;
+  gsap.set(mechanicsCards, { clearProps: "all" });
+}
+
+function placeHeroForDesktop(){
+  const bounds = heroTitle.getBoundingClientRect();
+  gsap.set(heroTitle, {
+    x: window.innerWidth * 0.05 - bounds.left,
+    y: window.innerHeight / 2 - bounds.top - heroTitle.offsetHeight * 0.55 / 2,
+    scale: 0.55,
+    transformOrigin: "top left"
+  });
+}
+
+function configureResponsiveAnimations(){
+  if (!responsiveAnimationsReady) return;
+
+  const nextOverviewFlowLayout = isOverviewFlowLayout();
+  const nextStackedLayout = isStackedLayout();
+
+  if (previousOverviewFlowLayout !== null &&
+      previousOverviewFlowLayout !== nextOverviewFlowLayout) {
+    resetOverviewAnimations();
+    if (nextOverviewFlowLayout) {
+      setScrollCueVisible(true);
+      if (isNarrowLayout()) gsap.set(heroTitle, { clearProps: "transform" });
+      else placeHeroForDesktop();
+    } else {
+      setScrollCueVisible(false);
+      placeHeroForDesktop();
+    }
+  }
+
+  if (previousStackedLayout !== null &&
+      previousStackedLayout !== nextStackedLayout) {
+    resetSectionAnimations();
+  }
+
+  previousOverviewFlowLayout = nextOverviewFlowLayout;
+  previousStackedLayout = nextStackedLayout;
+
+  initScroll();
+  initPracticalTitleScroll();
+  initDetailsScroll();
+  initMechanicsScroll();
+
+  requestAnimationFrame(() => {
+    ScrollTrigger.refresh();
+    spyUpdate();
+    scheduleScrollbarUpdate();
+  });
+}
+
+window.addEventListener("resize", () => {
+  if (!responsiveAnimationsReady) return;
+  window.clearTimeout(responsiveResizeTimer);
+  responsiveResizeTimer = window.setTimeout(configureResponsiveAnimations, 160);
+});
+
 const titleHover = gsap.timeline({ paused: true });
 if (!reduce) {
   titleHover.to(allChars, {
@@ -718,19 +844,28 @@ heroTitle.addEventListener("focusout", event => {
 });
 
 tl.eventCallback("onComplete", () => {
+  scrollPositionTracking = true;
   docEl.classList.remove("is-locked");
-  initScroll();
-  initPracticalTitleScroll();
-  initDetailsScroll();
-  initMechanicsScroll();
-  requestAnimationFrame(() => ScrollTrigger.refresh());
+  responsiveAnimationsReady = true;
+  configureResponsiveAnimations();
+  requestAnimationFrame(() => {
+    if (restoreScrollOnReload) {
+      const maxScroll = Math.max(0, docEl.scrollHeight - window.innerHeight);
+      window.scrollTo(0, Math.min(restoredScrollY, maxScroll));
+      ScrollTrigger.update();
+      spyUpdate();
+      scheduleScrollbarUpdate();
+    }
+  });
 
-  if (reduce || window.innerWidth <= 768) setScrollCueVisible(true);
+  if (reduce || isOverviewFlowLayout()) setScrollCueVisible(true);
   if (heroTitle.matches(":hover")) titleHover.play();
 });
 
 document.fonts.ready.then(() => {
-  if (reduce) {
+  if (restoreScrollOnReload) {
+    tl.progress(1);
+  } else if (reduce) {
     tl.progress(1);
     gsap.set(heroTitle, { clearProps: "transform,filter" });
     docEl.classList.remove("is-locked");
