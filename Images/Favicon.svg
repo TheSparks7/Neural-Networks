@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <text
+    x="128"
+    y="201"
+    text-anchor="middle"
+    font-family="Redaction, serif"
+    font-size="200"
+    font-weight="700"
+    fill="#ebe8e1"
+  >N</text>
+  <path
+    d="M188 58H201"
+    stroke="#ff5c2e"
+    stroke-width="5"
+    stroke-linecap="square"
+  />
+</svg>
