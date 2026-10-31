@@ -112,7 +112,6 @@ window.addEventListener("resize", scheduleScrollbarUpdate);
 new ResizeObserver(scheduleScrollbarUpdate).observe(document.body);
 scheduleScrollbarUpdate();
 
-/* page is locked until the intro has finished, finally did it after so muc grinding */
 docEl.classList.add("is-locked");
 
 const NS = "http://www.w3.org/2000/svg";
@@ -419,9 +418,13 @@ function setSpyActive(index){
 
 function spyUpdate(){
   let activeIndex = 0;
-  spyTargets.forEach((target, index) => {
-    if (target && target.getBoundingClientRect().top <= 1) activeIndex = index;
-  });
+  const atPageEnd = window.scrollY + window.innerHeight >= docEl.scrollHeight - 1;
+  if (atPageEnd) activeIndex = spyTargets.length - 1;
+  else {
+    spyTargets.forEach((target, index) => {
+      if (target && target.getBoundingClientRect().top <= 1) activeIndex = index;
+    });
+  }
   setSpyActive(activeIndex);
 }
 
@@ -451,8 +454,6 @@ spyUpdate();
 gsap.set(spyEl, { autoAlpha: 0, x: -14 });
 tl.to(spyEl, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power2.out" }, 3.9);
 
-/* No Comments bruv */
-
 let scrollBuilt = false;
 const practicalSection = document.querySelector(".mnist-demo");
 const detailsSection = document.querySelector(".details");
@@ -460,110 +461,11 @@ const detailsStage = detailsSection.querySelector(".details__stage");
 const detailsCards = Array.from(detailsStage.querySelectorAll(".details__card"));
 const detailsTransitions = detailsCards.length - 1;
 let detailsTimeline;
-let conceptScrollTween;
-
-const conceptPattern = /\b(neural\s+networks?|networks?|models?|neurons?|weights?|layers?|activation functions?|activations?|learning|training|trained|backpropagation|gradient descent)\b/gi;
-const conceptTargets = {
-  network: "details-network",
-  model: "details-network",
-  neuron: "details-neurons",
-  weight: "details-weights",
-  layer: "details-layers",
-  activation: "details-activation",
-  learning: "details-learning",
-  training: "details-learning",
-  trained: "details-learning",
-  backpropagation: "details-learning",
-  "gradient descent": "details-learning"
-};
-
-function getConceptTarget(term){
-  const normalized = term.toLowerCase().replace(/\s+/g, " ").replace(/s$/, "");
-  if (normalized.startsWith("neural ")) return conceptTargets.network;
-  return conceptTargets[normalized] || conceptTargets[normalized.split(" ")[0]];
-}
-
-function linkConcepts(container){
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-  const textNodes = [];
-  while (walker.nextNode()) {
-    if (walker.currentNode.textContent.trim()) textNodes.push(walker.currentNode);
-  }
-
-  textNodes.forEach(textNode => {
-    const text = textNode.textContent;
-    const matches = Array.from(text.matchAll(conceptPattern));
-    if (!matches.length) return;
-
-    const fragment = document.createDocumentFragment();
-    let cursor = 0;
-    matches.forEach(match => {
-      const targetId = getConceptTarget(match[0]);
-      if (!targetId) return;
-
-      fragment.append(document.createTextNode(text.slice(cursor, match.index)));
-      const link = document.createElement("a");
-      link.className = "concept-link";
-      link.href = `#${targetId}`;
-      link.textContent = match[0];
-      link.setAttribute("aria-label", `Read about ${match[0]} in Details`);
-      fragment.append(link);
-      cursor = match.index + match[0].length;
-    });
-
-    if (cursor === 0) return;
-    fragment.append(document.createTextNode(text.slice(cursor)));
-    textNode.replaceWith(fragment);
-  });
-}
-
-linkConcepts(document.querySelector(".info"));
-linkConcepts(practicalSection);
-
-document.querySelectorAll(".concept-link").forEach(link => {
-  let conceptTween;
-  link.dataset.restingColor = getComputedStyle(link).color;
-  link.dataset.restingUnderline = getComputedStyle(link).textDecorationColor;
-  const animate = active => {
-    if (conceptTween) conceptTween.kill();
-    conceptTween = gsap.to(link, {
-      color: active ? "#ff5c2e" : link.dataset.restingColor,
-      textDecorationColor: active ? "#ff5c2e" : link.dataset.restingUnderline,
-      textDecorationThickness: active ? "2px" : "1px",
-      duration: reduce ? 0 : 0.24,
-      ease: "power2.out",
-      overwrite: "auto"
-    });
-  };
-  link.addEventListener("pointerenter", () => animate(true));
-  link.addEventListener("pointerleave", () => animate(link === document.activeElement));
-  link.addEventListener("focusin", () => animate(true));
-  link.addEventListener("focusout", () => animate(link.matches(":hover")));
-  link.addEventListener("click", event => {
-    const target = document.getElementById(link.hash.slice(1));
-    const targetIndex = detailsCards.indexOf(target);
-    if (targetIndex < 0) return;
-
-    event.preventDefault();
-    if (conceptScrollTween) conceptScrollTween.kill();
-
-    const trigger = detailsTimeline && detailsTimeline.scrollTrigger;
-    const destination = trigger
-      ? trigger.start + (trigger.end - trigger.start) * targetIndex / detailsTransitions
-      : window.scrollY + target.getBoundingClientRect().top;
-    const scrollPosition = { y: window.scrollY };
-    conceptScrollTween = gsap.to(scrollPosition, {
-      y: destination,
-      duration: reduce ? 0 : 0.9,
-      ease: "power2.inOut",
-      onUpdate: () => window.scrollTo(0, scrollPosition.y),
-      onComplete: () => {
-        window.scrollTo(0, destination);
-        conceptScrollTween = null;
-      }
-    });
-  });
-});
+const mechanicsSection = document.querySelector(".mechanics");
+const mechanicsStage = mechanicsSection.querySelector(".mechanics__stage");
+const mechanicsCards = Array.from(mechanicsStage.querySelectorAll(".mechanics__card"));
+const mechanicsTransitions = mechanicsCards.length - 1;
+let mechanicsTimeline;
 
 const overviewTitleX = () => heroTitle.offsetWidth / 2 - window.innerWidth * 0.45;
 const overviewTitleYIn = () => heroTitle.offsetHeight * 0.225;
@@ -571,7 +473,7 @@ const overviewTitleYOut = () => heroTitle.offsetHeight / 2 - window.innerHeight 
 
 function initScroll(){
   if (scrollBuilt || reduce) return;
-  if (window.innerWidth <= 768) return;   /* mobile uses the normal document flow as the webste just breaks otherwise */
+  if (window.innerWidth <= 768) return;
   scrollBuilt = true;
 
   const infoEl     = document.querySelector(".info");
@@ -741,6 +643,51 @@ function initDetailsScroll(){
   }
 }
 
+function initMechanicsScroll(){
+  if (mechanicsTimeline || reduce || window.innerWidth <= 768 || mechanicsCards.length < 2) return;
+
+  gsap.set(mechanicsCards, { autoAlpha: 0, xPercent: 14 });
+  gsap.set(mechanicsCards[0], { autoAlpha: 1, xPercent: 0 });
+
+  mechanicsTimeline = gsap.timeline({
+    defaults: { ease: "power2.inOut" },
+    scrollTrigger: {
+      trigger: mechanicsSection,
+      pin: mechanicsStage,
+      pinSpacing: true,
+      start: "top top",
+      end: () => "+=" + Math.round(mechanicsTransitions * window.innerHeight),
+      scrub: true,
+      snap: {
+        snapTo: progress => Math.round(progress * mechanicsTransitions) / mechanicsTransitions,
+        duration: { min: 0.25, max: 0.5 },
+        delay: 0.08,
+        ease: "power2.out",
+        inertia: false
+      },
+      anticipatePin: 1,
+      invalidateOnRefresh: true
+    }
+  });
+
+  for (let i = 1; i <= mechanicsTransitions; i++) {
+    mechanicsTimeline
+      .to(mechanicsCards[i - 1], {
+        autoAlpha: 0,
+        xPercent: -12,
+        duration: 1
+      }, i - 1)
+      .fromTo(mechanicsCards[i], {
+        autoAlpha: 0,
+        xPercent: 14
+      }, {
+        autoAlpha: 1,
+        xPercent: 0,
+        duration: 1
+      }, i - 1);
+  }
+}
+
 const titleHover = gsap.timeline({ paused: true });
 if (!reduce) {
   titleHover.to(allChars, {
@@ -775,6 +722,7 @@ tl.eventCallback("onComplete", () => {
   initScroll();
   initPracticalTitleScroll();
   initDetailsScroll();
+  initMechanicsScroll();
   requestAnimationFrame(() => ScrollTrigger.refresh());
 
   if (reduce || window.innerWidth <= 768) setScrollCueVisible(true);

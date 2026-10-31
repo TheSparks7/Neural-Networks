@@ -10,16 +10,17 @@
   const statusEl = document.getElementById('mnist-status');
   const clearBtn = document.getElementById('mnist-clear');
   const digitEl = document.getElementById('mnist-digit');
-  const confidenceEl = document.getElementById('mnist-confidence');
+  const scoreEl = document.getElementById('mnist-score');
   const barsEl = document.getElementById('mnist-bars');
-  const sizeEl = document.getElementById('mnist-size');
   const paramsEl = document.getElementById('mnist-params');
 
   let model = null;
+  let modelLoadFailed = false;
   let drawing = false;
   let lastX = 0;
   let lastY = 0;
   let predictTimer = null;
+  let predictionVersion = 0;
 
 
   function resetCanvas() {
@@ -86,9 +87,10 @@
 
   function schedulePredict() {
     if (predictTimer) clearTimeout(predictTimer);
+    const version = ++predictionVersion;
     predictTimer = setTimeout(function () {
       predictTimer = null;
-      predict();
+      predict(version);
     }, 50);
   }
 
@@ -180,36 +182,38 @@
       row.className = 'mnist-demo__bar-row';
       row.innerHTML =
         '<span class="mnist-demo__bar-label">' + i + '</span>' +
-        '<span class="mnist-demo__bar-track">' +
+        '<span class="mnist-demo__bar-track" role="meter" aria-label="Digit ' + i + ' score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
         '<span class="mnist-demo__bar-fill" data-digit="' + i + '"></span>' +
         '</span>';
       barsEl.appendChild(row);
     }
   }
 
-  function updateBars(probs) {
+  function updateBars(scores) {
     const rows = barsEl.querySelectorAll('.mnist-demo__bar-row');
     let best = 0;
-    let bestProb = probs[0];
+    let bestScore = scores[0];
     for (let i = 0; i < 10; i++) {
-      if (probs[i] > bestProb) {
-        bestProb = probs[i];
+      if (scores[i] > bestScore) {
+        bestScore = scores[i];
         best = i;
       }
     }
     rows.forEach(function (row, i) {
       const fill = row.querySelector('.mnist-demo__bar-fill');
-      fill.style.width = (probs[i] * 100).toFixed(1) + '%';
+      const score = scores[i] * 100;
+      fill.style.width = score.toFixed(1) + '%';
+      fill.parentElement.setAttribute('aria-valuenow', score.toFixed(1));
       row.classList.toggle('is-winner', i === best);
     });
     digitEl.textContent = best;
-    confidenceEl.textContent = (bestProb * 100).toFixed(1) + '%';
-    statusEl.textContent = 'confident · ' + (bestProb * 100).toFixed(1) + '%';
+    scoreEl.textContent = 'Model score · ' + (bestScore * 100).toFixed(1) + '%';
+    statusEl.textContent = 'Top score · ' + (bestScore * 100).toFixed(1) + '%';
   }
 
   function resetReadout() {
     digitEl.textContent = '–';
-    confidenceEl.textContent = '—';
+    scoreEl.textContent = 'Model score —';
     const rows = barsEl.querySelectorAll('.mnist-demo__bar-row');
     rows.forEach(function (row) {
       row.classList.remove('is-winner');
@@ -218,32 +222,46 @@
   }
 
 
-  async function predict() {
+  async function predict(version) {
     if (!model) return;
-    const inputArr = preprocess();
-    if (!inputArr) {
-      statusEl.textContent = 'draw something';
-      resetReadout();
-      return;
+    let input;
+    let output;
+    try {
+      const inputArr = preprocess();
+      if (!inputArr) {
+        statusEl.textContent = 'Draw a digit';
+        resetReadout();
+        return;
+      }
+
+      statusEl.textContent = 'Classifying…';
+      input = tf.tensor4d(inputArr, [1, 28, 28, 1]);
+      output = model.predict(input);
+      const scores = await output.data();
+      if (version === predictionVersion) updateBars(scores);
+    } catch (err) {
+      console.error('Prediction failed:', err);
+      if (version === predictionVersion) {
+        resetReadout();
+        statusEl.textContent = 'Prediction failed. Clear and try again.';
+      }
+    } finally {
+      if (input) input.dispose();
+      if (output) output.dispose();
     }
-
-    statusEl.textContent = 'thinking…';
-
-    const input = tf.tensor4d(inputArr, [1, 28, 28, 1]);
-    const output = model.predict(input);
-    const probs = await output.data();
-
-    input.dispose();
-    output.dispose();
-
-    updateBars(probs);
   }
 
-
   clearBtn.addEventListener('click', function () {
+    predictionVersion += 1;
+    if (predictTimer) {
+      clearTimeout(predictTimer);
+      predictTimer = null;
+    }
     resetCanvas();
     resetReadout();
-    statusEl.textContent = 'ready — draw something';
+    statusEl.textContent = model
+      ? 'Ready — draw a digit'
+      : modelLoadFailed ? 'Model failed to load' : 'Loading model…';
   });
 
   async function loadModel() {
@@ -257,32 +275,12 @@
       dummy.dispose();
 
   
-      const params = model.countParams();
-      paramsEl.textContent = params.toLocaleString();
-
-  
-      let totalBytes = 0;
-      try {
-        const jsonRes = await fetch(MODEL_URL);
-        const jsonText = await jsonRes.text();
-        totalBytes += new Blob([jsonText]).size;
-
-        const weightsUrl = MODEL_URL.replace('model.json', 'group1-shard1of1.bin');
-        const head = await fetch(weightsUrl, { method: 'HEAD' });
-        const cl = head.headers.get('content-length');
-        if (cl) totalBytes += parseInt(cl, 10);
-        else totalBytes += params * 4; 
-      } catch (_) {
-        totalBytes = params * 4; 
-      }
-
-      const kb = Math.round(totalBytes / 1024);
-      sizeEl.textContent = '~' + kb + ' KB';
-
-      statusEl.textContent = 'ready — draw something';
+      paramsEl.textContent = model.countParams().toLocaleString();
+      statusEl.textContent = 'Ready — draw a digit';
     } catch (err) {
       console.error('Model load failed:', err);
-      statusEl.textContent = 'model failed to load';
+      modelLoadFailed = true;
+      statusEl.textContent = 'Model failed to load';
     }
   }
 
