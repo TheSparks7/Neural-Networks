@@ -256,19 +256,6 @@ body{
   letter-spacing:0;
 }
 
-.concept-link{
-  color:inherit;
-  text-decoration:underline;
-  text-decoration-color:rgba(255,92,46,.62);
-  text-decoration-thickness:1px;
-  text-underline-offset:.18em;
-  border-radius:1px;
-}
-.concept-link:focus-visible{
-  outline:1px solid rgba(255,92,46,.65);
-  outline-offset:3px;
-}
-
 .wikipedia-link{
   position:fixed;
   right:4vw;
@@ -362,7 +349,6 @@ body{
   35%{fill:var(--accent);transform:scale(1.2);filter:drop-shadow(0 0 3px rgba(255,92,46,.65))}
 }
 
-/*some other stuff I want to try out if I can make it work somehow*/
 .spy{
   --trans:.4s cubic-bezier(.22,1,.36,1);
   position:fixed;
@@ -533,14 +519,153 @@ body{
   max-width:58ch;
 }
 
-.placeholder{
+.mechanics{
   position:relative;
   z-index:250;
-  min-height:100vh;
   background:var(--bg);
   border-top:1px solid var(--line);
 }
-/* experiment end*/
+
+.mechanics__stage{
+  position:relative;
+  height:100vh;
+  height:100svh;
+  overflow:hidden;
+}
+
+.mechanics__heading{
+  position:absolute;
+  top:6vh;
+  left:8vw;
+  right:8vw;
+  z-index:2;
+  width:min(820px,100%);
+  margin-inline:auto;
+  display:grid;
+  grid-template-columns:max-content auto 1fr;
+  align-items:baseline;
+  column-gap:clamp(12px,2vw,24px);
+  pointer-events:none;
+}
+
+.mechanics__index,
+.mechanics__step{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+
+.mechanics__index{
+  margin:0;
+  white-space:nowrap;
+}
+
+.mechanics__separator{
+  color:var(--accent);
+  font-family:var(--display);
+  font-size:clamp(1.5rem,2.4vw,2.2rem);
+  font-weight:300;
+  line-height:1;
+}
+
+.mechanics__heading-title{
+  font-family:var(--display);
+  font-size:clamp(1.8rem,3.2vw,3rem);
+  font-weight:300;
+  line-height:1.04;
+  letter-spacing:-.04em;
+  font-variation-settings:"opsz" 144,"wght" 300,"SOFT" 30,"WONK" 1;
+}
+
+.mechanics__card{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  padding:12vh 8vw 5vh;
+  opacity:0;
+  visibility:hidden;
+}
+
+.mechanics__card:first-of-type{
+  opacity:1;
+  visibility:visible;
+}
+
+.mechanics__inner{
+  width:min(820px,100%);
+  margin-inline:auto;
+  display:grid;
+  gap:clamp(16px,2.2vh,24px);
+  padding-top:24px;
+  border-top:1px solid var(--line);
+}
+
+.mechanics__title{
+  font-family:var(--display);
+  font-size:clamp(2.2rem,5vw,4.4rem);
+  line-height:.95;
+  letter-spacing:-.045em;
+  font-weight:300;
+  font-variation-settings:"opsz" 144,"wght" 300,"SOFT" 30,"WONK" 1;
+}
+
+.mechanics__text{
+  max-width:64ch;
+  font-family:var(--mono);
+  font-size:clamp(15px,1vw,18px);
+  line-height:1.8;
+  letter-spacing:.005em;
+  color:var(--dim);
+  text-wrap:pretty;
+}
+
+.mechanics__source{
+  display:inline-block;
+  width:fit-content;
+  margin-top:5px;
+  padding-bottom:5px;
+  border-bottom:1px solid var(--line);
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.12em;
+  color:var(--dim);
+  text-decoration:none;
+  transition:color .25s ease,border-color .25s ease;
+}
+
+.mechanics__source:hover,
+.mechanics__source:focus-visible{
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+.development-note{
+  position:relative;
+  z-index:250;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:24px;
+  padding:24px 6vw;
+  border-top:1px solid var(--line);
+  background:var(--bg);
+}
+.development-note__label{
+  color:var(--accent);
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.development-note__text{
+  color:var(--dim);
+  font-family:var(--mono);
+  font-size:11px;
+  line-height:1.7;
+}
 
 @media (max-width:768px){
   body{overflow-x:clip;overflow-y:visible;overscroll-behavior:auto}
@@ -593,7 +718,39 @@ body{
   }
   .details__inner{padding-top:20px}
   .details__text{font-size:.88rem}
-  .placeholder{min-height:60vh}
+  .mechanics__stage{height:auto;overflow:visible}
+  .mechanics__heading{
+    position:relative;
+    top:auto;
+    left:auto;
+    right:auto;
+    width:auto;
+    margin:0 6vw;
+    padding-top:10vh;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:12px;
+  }
+  .mechanics__heading-title{flex:0 0 100%}
+  .mechanics__card{
+    position:relative;
+    inset:auto;
+    padding:9vh 6vw;
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+  .mechanics__inner{padding-top:20px;gap:18px}
+  .mechanics__heading-title{font-size:2.1rem}
+  .mechanics__title{font-size:clamp(2rem,9vw,3rem)}
+  .mechanics__text{font-size:.88rem;line-height:1.85}
+  .development-note{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:8px;
+    padding:20px 6vw;
+  }
 }
 @media (prefers-reduced-motion:reduce){
   .scroll-cue{
@@ -628,9 +785,24 @@ body{
   }
   .details__stage{height:auto;overflow:visible}
   .details__card{position:relative;inset:auto;padding:10vh 6vw;opacity:1 !important;visibility:visible !important;transform:none !important}
+  .mechanics__stage{height:auto;overflow:visible}
+  .mechanics__heading{
+    position:relative;
+    top:auto;
+    left:auto;
+    right:auto;
+    padding-top:8vh;
+  }
+  .mechanics__card{
+    position:relative;
+    inset:auto;
+    padding:9vh 8vw;
+    opacity:1 !important;
+    visibility:visible !important;
+    transform:none !important;
+  }
 }
 
-/*practical ai stuff*/
 .mnist-demo {
   position: relative;
   z-index: 250;
@@ -648,7 +820,7 @@ body{
 
 .mnist-demo__index {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 11px;
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--accent);
@@ -756,9 +928,9 @@ body{
   font-variation-settings: "opsz" 144, "wght" 300, "SOFT" 30, "WONK" 1;
 }
 
-.mnist-demo__confidence {
+.mnist-demo__score {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: .04em;
   color: var(--dim);
 }
@@ -841,13 +1013,6 @@ body{
   text-align: right;
 }
 
-.mnist-demo__stats abbr {
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: .2em;
-  cursor: help;
-}
-
 .mnist-demo__caption {
   font-family: var(--mono);
   font-size: 10px;
@@ -855,6 +1020,17 @@ body{
   color: var(--dim);
   max-width: 52ch;
 }
+
+.mnist-demo__caption a,
+.mnist-demo__stats a{
+  color:var(--fg);
+  text-decoration-color:rgba(255,92,46,.65);
+  text-underline-offset:.2em;
+}
+.mnist-demo__caption a:hover,
+.mnist-demo__caption a:focus-visible,
+.mnist-demo__stats a:hover,
+.mnist-demo__stats a:focus-visible{color:var(--accent)}
 
 @media (max-width: 768px) {
   .mnist-demo {

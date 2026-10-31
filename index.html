@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Neural Networks</title>
+<meta name="description" content="An interactive introduction to neural networks, with a browser-based handwritten-digit classifier.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="main.js" type="module"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,8 +23,9 @@
 
 <div class="boot-overlay"></div>
 <div class="noise-overlay"></div>
-<div class="intro-net" id="introNet"></div>
+<div class="intro-net" id="introNet" aria-hidden="true"></div>
 
+<main id="main-content">
 <div class="hero-stage">
   <h1 class="hero-title" id="heroTitle">
     <svg class="title-net" viewBox="0 0 1600 900" aria-hidden="true">
@@ -38,15 +40,15 @@
 
 <article class="info">
   <p class="info__lede">
-    An artificial neural network is a computational model inspired by biological neural networks. It consists of connected units called <em>artificial neurons</em>.
+    A neural network maps inputs to outputs through connected layers. During training, its weights are adjusted using examples; once trained, it can use those learned values to make predictions.
   </p>
   <div class="info__body">
     <p class="info__pullquote">
       Each connection has a weight; each neuron transforms its inputs.
     </p>
     <div class="info__details">
-      <p>Signals travel from an input layer, through any hidden layers, to an output layer. Each neuron processes incoming signals and applies a nonlinear activation function before passing its output onward.</p>
-      <p>During training, the network adjusts connection weights using examples. Those weights shape its outputs and let it make predictions on new inputs.</p>
+      <p>Signals pass from the input layer through hidden layers to the output layer. Each unit transforms its inputs before sending a value onward.</p>
+      <p>For digit recognition, an image is the input and the model returns a score for each possible digit. The interactive demo below uses a pretrained network to make that prediction.</p>
     </div>
   </div>
 </article>
@@ -73,8 +75,8 @@
     <li class="spy__item"><a class="spy__link" href="#overview"><span class="spy__bar"></span><span class="spy__label">Overview</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#practical"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#details"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
-    <li class="spy__item"><a class="spy__link" href="#training"><span class="spy__bar"></span><span class="spy__label">Future</span></a></li>
-    <li class="spy__item"><a class="spy__link" href="#source"><span class="spy__bar"></span><span class="spy__label">Conclusion</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#mechanics"><span class="spy__bar"></span><span class="spy__label">Mechanics</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#development"><span class="spy__bar"></span><span class="spy__label">In development</span></a></li>
   </ul>
 </nav>
 <section class="scroll-space" id="overview" aria-label="Overview"></section>
@@ -82,43 +84,40 @@
 
 <section class="mnist-demo" id="practical" aria-label="Practical">
   <div class="mnist-demo__inner">
-    <p class="mnist-demo__index">Practical - Hands on experience</p>
+    <p class="mnist-demo__index">Interactive demo</p>
     <h2 class="mnist-demo__title">Draw a digit</h2>
     <p class="mnist-demo__lede">
-      The network below is a frozen stack of weights; so, no images, no dataset, just numbers.
-      Draw a numeral and watch it decide. Isn't it fascinating? Well, it gets even better: the network is only ~250KB, yet it can recognize digits with ~99% accuracy. That's the power of distilled knowledge.
+      Draw a digit from 0 to 9. A pretrained MNIST classifier processes it in your browser and shows a score for each digit. The model is fixed: this demo runs inference, not training.
     </p>
 
     <div class="mnist-demo__grid">
       <div class="mnist-demo__canvas-wrap">
         <canvas id="mnist-canvas" width="280" height="280"
-                aria-label="Draw a digit here"></canvas>
+                aria-label="Draw a digit from zero to nine here"></canvas>
         <div class="mnist-demo__canvas-actions">
           <button type="button" class="mnist-demo__clear" id="mnist-clear">Clear</button>
-          <span class="mnist-demo__status" id="mnist-status">loading model…</span>
+          <span class="mnist-demo__status" id="mnist-status" role="status" aria-live="polite">Loading model…</span>
         </div>
       </div>
 
       <div class="mnist-demo__readout">
         <div class="mnist-demo__prediction">
-          <span class="mnist-demo__digit" id="mnist-digit">–</span>
-          <span class="mnist-demo__confidence" id="mnist-confidence">—</span>
+          <output class="mnist-demo__digit" id="mnist-digit" aria-label="Top predicted digit">–</output>
+          <span class="mnist-demo__score" id="mnist-score">Model score —</span>
         </div>
 
-        <div class="mnist-demo__bars" id="mnist-bars"></div>
+        <div class="mnist-demo__bars" id="mnist-bars" role="group" aria-label="Prediction scores for digits zero through nine"></div>
 
         <dl class="mnist-demo__stats">
-          <div><dt>Frozen weights</dt><dd id="mnist-size">…</dd></div>
           <div><dt>Parameters</dt><dd id="mnist-params">…</dd></div>
-          <div><dt>Trained on</dt><dd>60,000 <abbr title="MNIST is a dataset of 70,000 handwritten digit images, each labeled with its correct number. 1 sample = 1 image.">MNIST samples</abbr></dd></div>
-          <div><dt>Accuracy</dt><dd>~99%</dd></div>
-          <div><dt>Images sent to server</dt><dd>0</dd></div> <!--I don't actually know how to send it to a server, so ofc you can believe that-->
+          <div><dt>Training data</dt><dd><a href="https://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener noreferrer">MNIST digits</a></dd></div>
+          <div><dt>Input</dt><dd>28 × 28 grayscale</dd></div>
+          <div><dt>Processing</dt><dd>In this browser</dd></div>
         </dl>
 
         <p class="mnist-demo__caption">
-          This file contains only numbers. The training set is never downloaded —
-          what you get is the distilled result, a few hundred kilobytes of weights
-          that have already seen everything.
+          The pretrained model is loaded from <a href="https://carlos-aguayo.github.io/model/model.json" target="_blank" rel="noopener noreferrer">Carlos Aguayo’s public MNIST model</a>.
+          Drawing and prediction run in this browser; this demo does not upload drawings or train the model.
         </p>
       </div>
     </div>
@@ -130,48 +129,126 @@
       <div class="details__inner">
         <p class="details__index">01 / Model</p>
         <h2 class="details__title">The network</h2>
-        <p class="details__text">At its core, an artificial neural network is just a bunch of math nodes wired together to loosely mimic how biological brains process information. Data enters through an input layer, bounces through a series of hidden layers where the real heavy lifting happens, and spits out a result at the end. It figures things out not by following a rigid rulebook, but by constantly tweaking how strongly these connected nodes talk to each other.</p>
+        <p class="details__text">A neural network is made of layers of connected units. Each unit combines its inputs using learned weights and a bias, then applies an activation function. The layers work together to transform an input into a prediction.</p>
       </div>
     </article>
     <article class="details__card" id="details-neurons">
       <div class="details__inner">
         <p class="details__index">02 / Neurons</p>
         <h2 class="details__title">Neurons</h2>
-        <p class="details__text">An individual neuron is basically a tiny decision-maker. It takes a bunch of inputs, multiplies each by a specific weight to see how much it should actually care about them, adds them all up, and pushes the total through an activation function. Whatever survives that process gets passed down the line to feed the next layer.</p>
+        <p class="details__text">A neuron calculates a weighted sum of its inputs, adds a bias, and applies an activation function. Its output is passed to units in the next layer. This is a simplified mathematical model, not a description of how biological neurons work.</p>
       </div>
     </article>
     <article class="details__card" id="details-weights">
       <div class="details__inner">
         <p class="details__index">03 / Weights</p>
         <h2 class="details__title">Weights</h2>
-        <p class="details__text">Weights are the actual knobs and dials of the network. Every connection has one, acting as a multiplier that decides whether a signal gets amplified or muted. When a network learns, it isn't rewriting its own source code at all; rather it's just slowly turning these dials until the math finally adds up to the right answers.</p>
+        <p class="details__text">A weight scales the signal sent along a connection: larger magnitudes have more influence, while the sign affects its direction. Training adjusts weights and biases to reduce prediction error; they are learned values, not new program instructions.</p>
       </div>
     </article>
     <article class="details__card" id="details-layers">
       <div class="details__inner">
         <p class="details__index">04 / Layers</p>
         <h2 class="details__title">Layers</h2>
-        <p class="details__text">Instead of dumping everything into one chaotic mess, neurons are stacked into organized tiers. The input layer takes raw data as it is, the output layer gives you the final guess, and all the hidden layers in between do the tedious work of breaking down patterns that turn raw pixels into edges, edges into shapes, and shapes into actual concepts.</p>
+        <p class="details__text">The input layer receives the data, hidden layers transform it, and the output layer produces a prediction. What each layer learns depends on the network architecture and training data; visual features such as edges are one example, not a rule for every network.</p>
       </div>
     </article>
     <article class="details__card" id="details-activation">
       <div class="details__inner">
         <p class="details__index">05 / Activation</p>
         <h2 class="details__title">Activation</h2>
-        <p class="details__text">Without activation functions, stacking a million layers together is completely pointless because, mathematically speaking, multiple linear steps just collapse into one giant, boring straight line. Functions like ReLU, sigmoid, or tanh inject a bit of necessary non-linearity, allowing the network to wrap its head around complicated, messy real-world data instead of oversimplifying everything.</p>
+        <p class="details__text">An activation function adds nonlinearity after a unit combines its inputs. Without nonlinear activations, stacking linear layers is still equivalent to a single linear transformation. ReLU, sigmoid, and tanh are common examples, each with different properties and uses.</p>
       </div>
     </article>
     <article class="details__card" id="details-learning">
       <div class="details__inner">
         <p class="details__index">06 / Learning</p>
         <h2 class="details__title">Learning</h2>
-        <p class="details__text">Training is essentially an endless loop of making mistakes and adjusting course. The network takes a guess, checks how far off it was from the actual answer, and sends that error report backward through the system. Through a process called backpropagation and gradient descent, every single weight gets a tiny nudge in the right direction until the network stops screwing up quite so much.</p>
+        <p class="details__text">Training repeats a forward pass and measures the prediction error with a loss function. Backpropagation calculates gradients that show how each weight and bias contributes to that loss; an optimizer, such as gradient descent, uses those gradients to update the parameters. Repeating this process can reduce error, but it does not guarantee every prediction will be correct.</p>
       </div>
     </article>
   </div>
 </section>
-<section class="placeholder" id="training" aria-label="Future"></section>
-<section class="placeholder" id="source" aria-label="Conclusion"></section>
+<section class="mechanics" id="mechanics" aria-label="Mechanics">
+  <div class="mechanics__stage">
+    <header class="mechanics__heading">
+      <p class="mechanics__index">Mechanics</p>
+      <span class="mechanics__separator" aria-hidden="true">×</span>
+      <h2 class="mechanics__heading-title">From pixels to prediction.</h2>
+    </header>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">01 / Input</p>
+        <h2 class="mechanics__title">A drawing becomes an image</h2>
+        <p class="mechanics__text">
+          The canvas stores your white strokes on a black background at 280 × 280 pixels. Before the model sees them, the demo scans for the drawn area and crops the image to the ink. The network receives numerical pixel values, not the abstract idea of a handwritten digit.
+        </p>
+        <a class="mechanics__source" href="https://keras.io/api/datasets/mnist/" target="_blank" rel="noopener noreferrer">REFERENCE / KERAS — MNIST DATASET</a>
+      </div>
+    </article>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">02 / Preprocessing</p>
+        <h2 class="mechanics__title">Preparing the input</h2>
+        <p class="mechanics__text">
+          The cropped drawing is resized so its longest side is 20 pixels, then placed on a 28 × 28 black frame and centered by its ink intensity. The demo scales each grayscale pixel from 0–255 to 0–1 and shapes the values into a single-image tensor before inference. Matching the model’s expected input format is essential for a useful prediction.
+        </p>
+        <a class="mechanics__source" href="https://keras.io/examples/vision/mnist_convnet/" target="_blank" rel="noopener noreferrer">REFERENCE / KERAS — MNIST IMAGE PREPROCESSING</a>
+      </div>
+    </article>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">03 / Computation</p>
+        <h2 class="mechanics__title">The forward pass</h2>
+        <p class="mechanics__text">
+          The page loads a pretrained model and passes the prepared tensor to its prediction function. Inside a network, each layer transforms the values it receives and passes results onward until they reach the output. The model’s layer configuration lives in the downloaded model file, rather than being specified by this page.
+        </p>
+        <a class="mechanics__source" href="https://developers.google.com/machine-learning/crash-course/neural-networks/nodes-hidden-layers" target="_blank" rel="noopener noreferrer">REFERENCE / GOOGLE — NODES AND HIDDEN LAYERS</a>
+      </div>
+    </article>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">04 / Transformation</p>
+        <h2 class="mechanics__title">Why layers matter</h2>
+        <p class="mechanics__text">
+          Hidden layers can build useful representations by transforming signals between the input and output. Nonlinear activation functions let a network represent patterns that a stack of linear operations alone cannot. This site does not specify the loaded model’s exact layers or activation functions, so the demo should not be read as a visualization of those internal details.
+        </p>
+        <a class="mechanics__source" href="https://developers.google.com/machine-learning/crash-course/neural-networks/activation-functions" target="_blank" rel="noopener noreferrer">REFERENCE / GOOGLE — ACTIVATION FUNCTIONS</a>
+      </div>
+    </article>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">05 / Classification</p>
+        <h2 class="mechanics__title">Ten possible digits</h2>
+        <p class="mechanics__text">
+          The model returns a score for each digit from 0 to 9. The demo selects the digit with the largest returned value and displays all ten scores as bars. They are model outputs shown for comparison, not a separately verified accuracy measure or calibrated confidence.
+        </p>
+        <a class="mechanics__source" href="https://developers.google.com/machine-learning/crash-course/neural-networks" target="_blank" rel="noopener noreferrer">REFERENCE / GOOGLE — NEURAL NETWORKS</a>
+      </div>
+    </article>
+
+    <article class="mechanics__card">
+      <div class="mechanics__inner">
+        <p class="mechanics__step">06 / Training</p>
+        <h2 class="mechanics__title">Trained, not learning</h2>
+        <p class="mechanics__text">
+          The demo downloads a pretrained model and uses its fixed parameters to make predictions; drawing a digit does not train or update it. During training, a separate process can use prediction errors and their gradients to update weights and biases. That learning process happened before this interactive demo runs.
+        </p>
+        <a class="mechanics__source" href="https://developers.google.com/machine-learning/crash-course/neural-networks/backpropagation" target="_blank" rel="noopener noreferrer">REFERENCE / GOOGLE — BACKPROPAGATION</a>
+      </div>
+    </article>
+  </div>
+</section>
+<footer class="development-note" id="development">
+  <p class="development-note__label">Work in progress</p>
+  <p class="development-note__text">More topics and source notes are in development.</p>
+</footer>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
