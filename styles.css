@@ -136,7 +136,7 @@ body{
   align-items:center;
   justify-content:center;
   pointer-events:none;
-  z-index:690; /*( ͡° ͜ʖ ͡°)*/
+  z-index:690; 
   padding:0 24px;
 }
 
@@ -286,7 +286,7 @@ body{
   white-space:nowrap;
   pointer-events:none;
 }
-/* SUUUU! finally DONE WITH THIS. took my whole day,can't even commit cuz no electrcity, gotta sleep cuz it's nearly 2am, good luck for the next day, i'm planning on adding different scroll types inshallah */
+
 .scroll-cue{
   position:fixed;
   z-index:710;

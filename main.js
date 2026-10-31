@@ -1,5 +1,5 @@
 gsap.registerPlugin(ScrollTrigger);
-// Restore scroll only on reload as it feels kinda wrong on back and frward navigation
+// Restore scroll only on reload as it feels kinda wrong on back and frward navugation
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const docEl = document.documentElement;
 const scrollCue = document.querySelector(".scroll-cue");
