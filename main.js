@@ -281,23 +281,116 @@ titleNetEdges.forEach(edge => {
 });
 const wikipediaLink = document.querySelector(".wikipedia-link");
 const wikipediaLabel = wikipediaLink.querySelector(".wikipedia-label");
+const wikipediaSvg = wikipediaLink.querySelector("svg");
+
 gsap.set(".info__body", { autoAlpha: 0, y: 14 });
 gsap.set(wikipediaLink, { autoAlpha: 0, y: 12, rotation: -12, transformOrigin: "50% 50%" });
 gsap.set(wikipediaLabel, { opacity: 0, x: 8, yPercent: -50 });
+
 const wikipediaLabelTween = gsap.to(wikipediaLabel, {
   opacity: 1,
   x: 0,
+  duration: reduce ? 0 : 0.28,
+  ease: "power2.out",
+  paused: true
+});
+
+const wikipediaSvgTween = gsap.to(wikipediaSvg, {
+  scale: 1.2,
+  rotation: -6,
+  filter: "drop-shadow(0 0 8px rgba(255,92,46,.5))",
+  duration: reduce ? 0 : 0.35,
+  ease: "power2.out",
+  paused: true
+});
+
+const wikipediaLinkTween = gsap.to(wikipediaLink, {
+  y: -3,
+  color: "#ff5c2e",
   duration: reduce ? 0 : 0.3,
   ease: "power2.out",
   paused: true
 });
 
-wikipediaLink.addEventListener("mouseenter", () => wikipediaLabelTween.play());
-wikipediaLink.addEventListener("mouseleave", () => wikipediaLabelTween.reverse());
-wikipediaLink.addEventListener("focusin", () => wikipediaLabelTween.play());
+function playWikiHover() {
+  wikipediaLabelTween.play();
+  wikipediaSvgTween.play();
+  wikipediaLinkTween.play();
+}
+
+function reverseWikiHover() {
+  wikipediaLabelTween.reverse();
+  wikipediaSvgTween.reverse();
+  wikipediaLinkTween.reverse();
+}
+
+wikipediaLink.addEventListener("mouseenter", playWikiHover);
+wikipediaLink.addEventListener("mouseleave", reverseWikiHover);
+wikipediaLink.addEventListener("focusin", playWikiHover);
 wikipediaLink.addEventListener("focusout", event => {
-  if (!wikipediaLink.contains(event.relatedTarget)) wikipediaLabelTween.reverse();
+  if (!wikipediaLink.contains(event.relatedTarget)) reverseWikiHover();
 });
+
+const logoRow = document.querySelector(".conclusion__logo-row");
+if (logoRow) {
+  const logos = logoRow.querySelectorAll(".conclusion__logo");
+  const cross = logoRow.querySelector(".conclusion__cross");
+
+  logos.forEach((logo, i) => {
+    const img = logo.querySelector("img");
+    const isLeft = i === 0;
+
+    const hoverTl = gsap.timeline({ paused: true });
+
+    hoverTl
+      .to(logo, {
+        y: -8,
+        scale: 1.12,
+        rotation: isLeft ? -6 : 6,
+        duration: 0.45,
+        ease: "power3.out"
+      }, 0)
+      .to(img, {
+        filter: "drop-shadow(0 0 14px rgba(255,92,46,.55))",
+        duration: 0.4,
+        ease: "power2.out"
+      }, 0)
+      .to(logo, {
+        y: -4,
+        scale: 1.08,
+        duration: 0.6,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1
+      }, 0.45);
+
+    logo.addEventListener("mouseenter", () => {
+      logo.classList.add("is-hovered");
+      hoverTl.play();
+    });
+
+    logo.addEventListener("mouseleave", () => {
+      logo.classList.remove("is-hovered");
+      hoverTl.pause(0);
+      gsap.to(logo, {
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        duration: 0.5,
+        ease: "power3.out"
+      });
+      gsap.to(img, {
+        filter: "none",
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    });
+  });
+
+  if (cross) {
+    gsap.set(cross, { transformOrigin: "50% 50%" });
+  }
+}
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
 
@@ -509,14 +602,19 @@ const mechanicsCards = Array.from(mechanicsStage.querySelectorAll(".mechanics__c
 const mechanicsTransitions = mechanicsCards.length - 1;
 let mechanicsTimeline;
 const applicationSection = document.querySelector(".application");
+const conclusionSection = document.querySelector(".conclusion");
 const applicationIntro = applicationSection.querySelector(".application__intro");
 const applicationStage = applicationSection.querySelector(".application__stage");
 const applicationCards = Array.from(applicationStage.querySelectorAll(".application__card"));
 const applicationProgressLine = applicationStage.querySelector(".application__rail-progress");
+const conclusionMarks = conclusionSection.querySelector(".conclusion__marks");
+const conclusionClosingTitle = conclusionSection.querySelector(".conclusion__closing-title");
+const conclusionLogo = conclusionSection.querySelector(".conclusion__logo");
 let applicationIntroAnimation;
 let applicationProgressAnimation;
 let applicationCardAnimations = [];
 let applicationTitleTimeline;
+let conclusionTitleAnimation;
 
 const overviewTitleX = () => heroTitle.offsetWidth / 2 - window.innerWidth * 0.45;
 const overviewTitleYIn = () => heroTitle.offsetHeight * 0.225;
@@ -698,7 +796,29 @@ function initApplicationScroll(){
 }
 
 function initApplicationTitleScroll(){
-  if (applicationTitleTimeline || reduce || isNarrowLayout()) return;
+  if (applicationTitleTimeline || conclusionTitleAnimation) return;
+
+  if (isNarrowLayout()) {
+    if (reduce) return;
+    conclusionTitleAnimation = gsap.fromTo(conclusionClosingTitle, {
+      y: 24,
+      autoAlpha: 0
+    }, {
+      y: 0,
+      autoAlpha: 1,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: conclusionMarks,
+        start: "top 75%",
+        end: "top 48%",
+        scrub: 0.6,
+        invalidateOnRefresh: true
+      }
+    });
+    return;
+  }
+
+  if (reduce || !detailsTimeline || detailsTransitions < 1) return;
 
   const cornerMarginX = () => Math.max(12, window.innerWidth * 0.015);
   const cornerMarginY = () => Math.max(14, window.innerHeight * 0.02);
@@ -723,36 +843,60 @@ function initApplicationTitleScroll(){
   const cornerY = () => cornerMarginY() -
     (window.innerHeight - heroTitle.offsetHeight) / 2;
 
-  applicationTitleTimeline = gsap.timeline({
+  applicationTitleTimeline = gsap.fromTo(heroTitle, {
+    x: overviewTitleX,
+    y: overviewTitleYOut,
+    scale: 0.30
+  }, {
+    x: cornerX,
+    y: cornerY,
+    scale: cornerScale,
+    ease: "power2.inOut",
+    immediateRender: false,
     scrollTrigger: {
-      trigger: applicationSection,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true,
+      trigger: detailsSection,
+      start: () => detailsTimeline.scrollTrigger.end - window.innerHeight,
+      end: () => detailsTimeline.scrollTrigger.end,
+      scrub: 0.8,
       invalidateOnRefresh: true
     }
   });
 
-  applicationTitleTimeline
-    .fromTo(heroTitle, {
-      x: overviewTitleX,
-      y: overviewTitleYOut,
-      scale: 0.30
-    }, {
-      x: cornerX,
-      y: cornerY,
-      scale: cornerScale,
-      duration: 0.02,
-      ease: "none",
-      immediateRender: false
-    }, 0)
-    .to(heroTitle, {
-      x: overviewTitleX,
-      y: overviewTitleYOut,
-      scale: 0.30,
-      duration: 0.02,
-      ease: "none"
-    }, 0.98);
+  const closingScale = () => Math.min(
+    0.26,
+    (window.innerWidth - 48) / heroTitle.offsetWidth
+  );
+  const closingX = () =>
+    window.innerWidth / 2 - heroTitle.offsetWidth * closingScale() / 2 -
+    (window.innerWidth - heroTitle.offsetWidth) / 2;
+  const closingY = () => {
+    const logoHeight = conclusionLogo.getBoundingClientRect().height;
+    const titleHeight = heroTitle.offsetHeight * closingScale();
+    const gap = Math.max(20, Math.min(40, window.innerHeight * 0.04));
+    const titleTop = window.innerHeight / 2 - logoHeight / 2 - gap - titleHeight;
+    return titleTop - (window.innerHeight - heroTitle.offsetHeight) / 2;
+  };
+
+  conclusionTitleAnimation = gsap.fromTo(heroTitle, {
+    x: cornerX,
+    y: cornerY,
+    scale: cornerScale,
+    autoAlpha: 1
+  }, {
+    x: closingX,
+    y: closingY,
+    scale: closingScale,
+    autoAlpha: 1,
+    ease: "power2.inOut",
+    immediateRender: false,
+    scrollTrigger: {
+      trigger: conclusionMarks,
+      start: "top bottom",
+      end: "bottom bottom",
+      scrub: 0.8,
+      invalidateOnRefresh: true
+    }
+  });
 }
 
 function initDetailsScroll(){
@@ -854,6 +998,8 @@ function killScrollTimeline(timeline){
 function resetOverviewAnimations(){
   killScrollTimeline(applicationTitleTimeline);
   applicationTitleTimeline = null;
+  killScrollTimeline(conclusionTitleAnimation);
+  conclusionTitleAnimation = null;
   if (overviewCueTrigger) {
     overviewCueTrigger.kill();
     overviewCueTrigger = null;
