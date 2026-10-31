@@ -76,7 +76,7 @@
     <li class="spy__item"><a class="spy__link" href="#practical"><span class="spy__bar"></span><span class="spy__label">Practical</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#details"><span class="spy__bar"></span><span class="spy__label">Details</span></a></li>
     <li class="spy__item"><a class="spy__link" href="#mechanics"><span class="spy__bar"></span><span class="spy__label">Mechanics</span></a></li>
-    <li class="spy__item"><a class="spy__link" href="#development"><span class="spy__bar"></span><span class="spy__label">In development</span></a></li>
+    <li class="spy__item"><a class="spy__link" href="#application"><span class="spy__bar"></span><span class="spy__label">Application</span></a></li>
   </ul>
 </nav>
 <section class="scroll-space" id="overview" aria-label="Overview"></section>
@@ -110,7 +110,7 @@
 
         <dl class="mnist-demo__stats">
           <div><dt>Parameters</dt><dd id="mnist-params">…</dd></div>
-          <div><dt>Training data</dt><dd><a href="https://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener noreferrer">MNIST digits</a></dd></div>
+          <div><dt>Training data</dt><dd><a href="https://keras.io/api/datasets/mnist/" target="_blank" rel="noopener noreferrer">MNIST digits</a></dd></div>
           <div><dt>Input</dt><dd>28 × 28 grayscale</dd></div>
           <div><dt>Processing</dt><dd>In this browser</dd></div>
         </dl>
@@ -240,6 +240,72 @@
           The demo downloads a pretrained model and uses its fixed parameters to make predictions; drawing a digit does not train or update it. During training, a separate process can use prediction errors and their gradients to update weights and biases. That learning process happened before this interactive demo runs.
         </p>
         <a class="mechanics__source" href="https://developers.google.com/machine-learning/crash-course/neural-networks/backpropagation" target="_blank" rel="noopener noreferrer">REFERENCE / GOOGLE — BACKPROPAGATION</a>
+      </div>
+    </article>
+  </div>
+</section>
+<section class="application" id="application" aria-label="Application">
+  <div class="application__intro">
+    <p class="application__index">In Development / Application</p>
+    <h2 class="application__title">Where it ships</h2>
+    <p class="application__lede">
+      Neural networks aren't just a research curiosity anymore. They run silently
+      inside the products we touch every day — reading scans, flagging fraud,
+      translating speech, and steering cars. Here's where the math actually shows up.
+    </p>
+  </div>
+
+  <div class="application__stage">
+    <div class="application__rail" aria-hidden="true">
+      <span class="application__rail-progress"></span>
+    </div>
+    <article class="application__card is-right">
+      <div class="application__card-inner">
+        <p class="application__card-index">01 / Healthcare</p>
+        <h3 class="application__card-title">Healthcare</h3>
+        <p class="application__card-text">
+          Neural networks read X-rays, MRIs, and pathology slides faster than a radiologist can blink. They flag tumors, segment organs, and predict patient risk by learning patterns hidden inside millions of scans — patterns too subtle for the naked eye to catch consistently.
+        </p>
+      </div>
+    </article>
+
+    <article class="application__card is-left">
+      <div class="application__card-inner">
+        <p class="application__card-index">02 / Finance</p>
+        <h3 class="application__card-title">Finance</h3>
+        <p class="application__card-text">
+          Every time a credit card gets declined at 3 a.m. in another country, a neural network made that call. These models scan transaction sequences in milliseconds, scoring fraud risk and approving loans by weighing thousands of signals that would take a human analyst hours to untangle.
+        </p>
+      </div>
+    </article>
+
+    <article class="application__card is-right">
+      <div class="application__card-inner">
+        <p class="application__card-index">03 / Language</p>
+        <h3 class="application__card-title">Language</h3>
+        <p class="application__card-text">
+          Translation, autocomplete, summarization, chat — the text you read online is increasingly routed through transformer networks. They map words into dense vector spaces, then learn which relationships matter, letting a single model translate, answer questions, and write prose it was never explicitly taught.
+        </p>
+      </div>
+    </article>
+
+    <article class="application__card is-left">
+      <div class="application__card-inner">
+        <p class="application__card-index">04 / Vision</p>
+        <h3 class="application__card-title">Vision</h3>
+        <p class="application__card-text">
+          Convolutional networks power the cameras that unlock your phone, the checkout that recognizes your receipt, and the quality-control line that spots a cracked lens before it ships. Each layer learns a slightly more abstract feature — edges, then textures, then whole objects — until the final layer knows what it's looking at.
+        </p>
+      </div>
+    </article>
+
+    <article class="application__card is-right">
+      <div class="application__card-inner">
+        <p class="application__card-index">05 / Autonomy</p>
+        <h3 class="application__card-title">Autonomy</h3>
+        <p class="application__card-text">
+          Self-driving stacks fuse camera, lidar, and radar into a single perception model that predicts what every object around the car will do next. Neural networks handle detection, tracking, trajectory forecasting, and control — all in real time, at 30 frames per second, on hardware smaller than a lunchbox.
+        </p>
       </div>
     </article>
   </div>

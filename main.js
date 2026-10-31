@@ -508,6 +508,15 @@ const mechanicsStage = mechanicsSection.querySelector(".mechanics__stage");
 const mechanicsCards = Array.from(mechanicsStage.querySelectorAll(".mechanics__card"));
 const mechanicsTransitions = mechanicsCards.length - 1;
 let mechanicsTimeline;
+const applicationSection = document.querySelector(".application");
+const applicationIntro = applicationSection.querySelector(".application__intro");
+const applicationStage = applicationSection.querySelector(".application__stage");
+const applicationCards = Array.from(applicationStage.querySelectorAll(".application__card"));
+const applicationProgressLine = applicationStage.querySelector(".application__rail-progress");
+let applicationIntroAnimation;
+let applicationProgressAnimation;
+let applicationCardAnimations = [];
+let applicationTitleTimeline;
 
 const overviewTitleX = () => heroTitle.offsetWidth / 2 - window.innerWidth * 0.45;
 const overviewTitleYIn = () => heroTitle.offsetHeight * 0.225;
@@ -636,6 +645,116 @@ function initPracticalTitleScroll(){
   }, 0.88);
 }
 
+function initApplicationScroll(){
+  if (!applicationIntroAnimation && !reduce) {
+    applicationIntroAnimation = gsap.from(applicationIntro.children, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.12,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: applicationIntro,
+        start: "top 78%",
+        toggleActions: "play none none reverse"
+      }
+    });
+  }
+
+  if (reduce || applicationCards.length === 0) return;
+
+  if (!applicationProgressAnimation) {
+    applicationProgressAnimation = gsap.fromTo(applicationProgressLine, {
+      scaleY: 0,
+      transformOrigin: "top center"
+    }, {
+      scaleY: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: applicationStage,
+        start: "top 70%",
+        end: "bottom 40%",
+        scrub: true,
+        invalidateOnRefresh: true
+      }
+    });
+  }
+
+  if (!applicationCardAnimations.length) {
+    applicationCards.forEach(card => {
+      applicationCardAnimations.push(gsap.from(card, {
+        y: 28,
+        opacity: 0,
+        duration: 0.7,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: card,
+          start: "top 82%",
+          toggleActions: "play none none reverse"
+        }
+      }));
+    });
+  }
+}
+
+function initApplicationTitleScroll(){
+  if (applicationTitleTimeline || reduce || isNarrowLayout()) return;
+
+  const cornerMarginX = () => Math.max(12, window.innerWidth * 0.015);
+  const cornerMarginY = () => Math.max(14, window.innerHeight * 0.02);
+  const applicationContentRight = () => {
+    const reservedSpace = Math.min(84, Math.max(32, window.innerWidth * 0.08));
+    const introRight = (window.innerWidth + Math.min(window.innerWidth, 1000)) / 2 -
+      window.innerWidth * 0.06 - reservedSpace;
+    const cardsRight = (window.innerWidth + Math.min(window.innerWidth, 1200)) / 2 -
+      window.innerWidth * 0.06 - reservedSpace;
+    return Math.max(introRight, cardsRight);
+  };
+  const cornerScale = () => Math.min(
+    0.16,
+    (window.innerWidth - cornerMarginX() * 2) * 0.28 / heroTitle.offsetWidth,
+    Math.min(44, window.innerHeight * 0.06) / heroTitle.offsetHeight,
+    (window.innerWidth - cornerMarginX() - applicationContentRight() - 6) /
+      (heroTitle.offsetWidth * 1.14)
+  );
+  const cornerX = () => window.innerWidth - cornerMarginX() -
+    heroTitle.offsetWidth * cornerScale() -
+    (window.innerWidth - heroTitle.offsetWidth) / 2;
+  const cornerY = () => cornerMarginY() -
+    (window.innerHeight - heroTitle.offsetHeight) / 2;
+
+  applicationTitleTimeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: applicationSection,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: true,
+      invalidateOnRefresh: true
+    }
+  });
+
+  applicationTitleTimeline
+    .fromTo(heroTitle, {
+      x: overviewTitleX,
+      y: overviewTitleYOut,
+      scale: 0.30
+    }, {
+      x: cornerX,
+      y: cornerY,
+      scale: cornerScale,
+      duration: 0.02,
+      ease: "none",
+      immediateRender: false
+    }, 0)
+    .to(heroTitle, {
+      x: overviewTitleX,
+      y: overviewTitleYOut,
+      scale: 0.30,
+      duration: 0.02,
+      ease: "none"
+    }, 0.98);
+}
+
 function initDetailsScroll(){
   if (detailsTimeline || reduce || isStackedLayout() || detailsCards.length < 2) return;
 
@@ -733,6 +852,8 @@ function killScrollTimeline(timeline){
 }
 
 function resetOverviewAnimations(){
+  killScrollTimeline(applicationTitleTimeline);
+  applicationTitleTimeline = null;
   if (overviewCueTrigger) {
     overviewCueTrigger.kill();
     overviewCueTrigger = null;
@@ -757,6 +878,13 @@ function resetSectionAnimations(){
   killScrollTimeline(mechanicsTimeline);
   mechanicsTimeline = null;
   gsap.set(mechanicsCards, { clearProps: "all" });
+
+  killScrollTimeline(applicationProgressAnimation);
+  applicationProgressAnimation = null;
+  applicationCardAnimations.forEach(killScrollTimeline);
+  applicationCardAnimations = [];
+  gsap.set(applicationCards, { clearProps: "opacity,transform" });
+  gsap.set(applicationProgressLine, { clearProps: "transform" });
 }
 
 function placeHeroForDesktop(){
@@ -800,6 +928,8 @@ function configureResponsiveAnimations(){
   initPracticalTitleScroll();
   initDetailsScroll();
   initMechanicsScroll();
+  initApplicationScroll();
+  initApplicationTitleScroll();
 
   requestAnimationFrame(() => {
     ScrollTrigger.refresh();
