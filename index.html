@@ -20,7 +20,7 @@
     <feDisplacementMap id="glitch-map" in="SourceGraphic" in2="t" scale="0" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
 </svg>
-
+<!-- if the boot animation looks weird it's because I hand-tuned every single timestamp below instead of using a sane easing curve. do not touch (to my future self). -->
 <div class="boot-overlay"></div>
 <div class="noise-overlay"></div>
 <div class="intro-net" id="introNet" aria-hidden="true"></div>
@@ -36,6 +36,7 @@
     <span class="hero-title__line" data-text="Neural"></span>
     <span class="hero-title__line" data-text="Networks"></span>
   </h1>
+  <!-- a couple of hours of my life went into positioning this title. it's two words. -->
 </div>
 
 <article class="info">
@@ -80,6 +81,7 @@
     <li class="spy__item"><a class="spy__link" href="#conclusion"><span class="spy__bar"></span><span class="spy__label">Conclusion</span></a></li>
   </ul>
 </nav>
+<!-- After watching so many tutorials, I can confidently say:scrollspy looks simple. scrollspy is not simple. -->
 <section class="scroll-space" id="overview" aria-label="Overview"></section>
 <div class="overview-settle-space" aria-hidden="true"></div>
 
@@ -124,6 +126,7 @@
     </div>
   </div>
 </section>
+<!-- a model trained on 60,000 handwritten digits, running inside my browser, predicting whatever I scribble, for free, in milliseconds.I've tried reading the source code and I still can't fully believe this actually works. -->
 <section class="details" id="details" aria-label="Details">
   <div class="details__stage">
     <article class="details__card" id="details-network">
@@ -283,7 +286,7 @@ Neural nets are no longer just a subject of academic research. They form the com
         <p class="application__card-index">03 / Language</p>
         <h3 class="application__card-title">Language</h3>
         <p class="application__card-text">
-          Translation, autocomplete, summarisation, chat... the text you read online is increasingly being funneled through transformer networks. They take words and map them into dense vector spaces, then learn what the relationships between those vectors are, enabling a single model to do translation, answer questions and write prose that it was never explicitly taught.
+          Translation, autocomplete, summarisation, chat... the text you read online is increasingly being funneled through transformer networks. They take words and map them into dense vector spaces, then learn what the relationships between those vectors are, enabling a single model to do translation, answer questions and write prose that it was never explicitly taught.</p>
       </div>
     </article>
 
@@ -314,7 +317,7 @@ Neural nets are no longer just a subject of academic research. They form the com
     <h2 class="conclusion__title">A model of the world.</h2>
     <div class="conclusion__text">
       <p>
-        What looks like intelligence on a screen is at its heart just an exercise in geometry. When you scribbled that digit into the browser demo earlier, the system didn't read your handwriting at all. It was simply working out a series of probabilities through a chain of weights and activations. It removes all the mystique and what you're left with is just numbers.
+        What looks like intelligence on a screen is at its heart just an exercise in geometry. When you scribbled that digit into the browser demo earlier, the system didn't read your handwriting at all. It was simply working out a series of probabilities through a chain of weights and activations. It removes all the mystique and what you're left with is just numbers.</p>
       <p>
         But there's still a very clear line between calculation and understanding. The network doesn't know what a number is, it doesn't have any concept of a human pulse. It's just learning to map inputs to outputs by minimising error over millions of examples, finding the stable patterns in what would appear to be utter noise to anything simpler.
       </p>
